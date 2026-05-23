@@ -1,0 +1,747 @@
+{
+  "_comment": "Kinetic Leisure - Event Templates (tokenized + variance). Phase 2: expanded healthy baseline for ITSI-ready data.",
+  "_description": "Identity tokens (hydrated at startup from stores.json): __NWID__, __S3__, __S6__, __SN__, __CC__, __cc__, __CITY__, __IPO__, __MAC__. Variance tokens (replaced at send time with random values): %%JITTER%% (2-8), %%LATENCY%% (10-25), %%VQOE%% (7-10), %%TX_OCT%% (2M-6M), %%RX_OCT%% (1.5M-4.5M), %%TX_PKT%% (15K-35K), %%RX_PKT%% (10K-25K), %%RESP_MS%% (30-65), %%HOP_LAT%% (4-12), %%ISP_LAT%% (3-9), %%RSSI_GOOD%% (-45 to -55), %%RSSI_OK%% (-60 to -68), %%POE_USED%% (120-280), %%UPTIME%% (86400-604800), %%REACH_PCT%% (99.5-100.0), %%PATH_CHG%% (0-2), %%LOSS_ZERO%% (0.0-0.3).",
+  "_mutex_groups": {
+    "wan": [
+      "wan_transport_failure",
+      "wan_degraded"
+    ],
+    "switch_ap_overlap": [
+      "switch_failure",
+      "ap_hardware_failure"
+    ]
+  },
+  "_mutex_note": "Faults in the same mutex group should not run simultaneously - they write conflicting events to the same sourcetypes/devices. ise_policy_rejection and camera_wifi_flap are independent and can coexist with any other fault.",
+  "_device_map": {
+    "S001 (MS-1)": "Uplinks AP-1 and AP-2. PoE-powers IoT cameras, scanners on ports 1-12.",
+    "S002 (MS-2)": "Uplinks AP-3. PoE-powers POS terminals, sensors on ports 1-8.",
+    "AP-1": "Main floor front. Clients: IoT-Camera-01, scanner_svc_01, POS-Terminal-01.",
+    "AP-2": "Main floor rear. Clients: IoT-Camera-02, scanner_svc_02.",
+    "AP-3": "Stockroom/back office. Clients: IoT-Sensor-Temp-01, pos_terminal_01, IoT-Camera-03."
+  },
+  "healthy": {
+    "_description": "27 structurally distinct templates with runtime variance. Sent continuously when no faults are active for a store.",
+    "interval_seconds": 30,
+    "events": [
+      {
+        "_comment": "\u2500\u2500 Meraki Access Points (8 templates) \u2500\u2500"
+      },
+      {
+        "id": "meraki-ap1-auth-pos",
+        "sourcetype": "meraki:accesspoints",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_auth\",\"deviceSerial\":\"Q2KD-KL__S3__-C001\",\"deviceName\":\"KL-__S3__-__CC__-AP-1\",\"clientDescription\":\"POS-Terminal-01\",\"clientMac\":\"a4:5e:60:c1:__MAC__:01\",\"description\":\"WPA authentication successful\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":36,\"rssi\":%%RSSI_GOOD%%}"
+      },
+      {
+        "id": "meraki-ap2-eap-scanner",
+        "sourcetype": "meraki:accesspoints",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"8021x_eap_success\",\"deviceSerial\":\"Q2KD-KL__S3__-C002\",\"deviceName\":\"KL-__S3__-__CC__-AP-2\",\"clientDescription\":\"Scanner-HH-01\",\"description\":\"802.1X EAP authentication succeeded\",\"eventData\":{\"identity\":\"scanner_svc_01\",\"client_mac\":\"b8:27:eb:d2:__MAC__:01\",\"client_ip\":\"172.16.__IPO__.21\"}}"
+      },
+      {
+        "id": "meraki-ap3-auth-sensor",
+        "sourcetype": "meraki:accesspoints",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_auth\",\"deviceSerial\":\"Q2KD-KL__S3__-C003\",\"deviceName\":\"KL-__S3__-__CC__-AP-3\",\"clientDescription\":\"IoT-Sensor-Temp-01\",\"clientMac\":\"dc:a6:32:e3:__MAC__:03\",\"description\":\"WPA authentication successful\",\"ssid\":\"KL-IOT\",\"band\":\"2.4 GHz\",\"channel\":6,\"rssi\":%%RSSI_OK%%}"
+      },
+      {
+        "id": "meraki-ap1-auth-camera1",
+        "sourcetype": "meraki:accesspoints",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_auth\",\"deviceSerial\":\"Q2KD-KL__S3__-C001\",\"deviceName\":\"KL-__S3__-__CC__-AP-1\",\"clientDescription\":\"IoT-Camera-01\",\"clientMac\":\"dc:a6:32:e3:__MAC__:01\",\"description\":\"WPA authentication successful\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":36,\"rssi\":%%RSSI_GOOD%%}"
+      },
+      {
+        "id": "meraki-ap2-auth-camera2",
+        "sourcetype": "meraki:accesspoints",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_auth\",\"deviceSerial\":\"Q2KD-KL__S3__-C002\",\"deviceName\":\"KL-__S3__-__CC__-AP-2\",\"clientDescription\":\"IoT-Camera-02\",\"clientMac\":\"dc:a6:32:e3:__MAC__:02\",\"description\":\"WPA authentication successful\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":40,\"rssi\":%%RSSI_GOOD%%}"
+      },
+      {
+        "id": "meraki-ap2-eap-scanner2",
+        "sourcetype": "meraki:accesspoints",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"8021x_eap_success\",\"deviceSerial\":\"Q2KD-KL__S3__-C002\",\"deviceName\":\"KL-__S3__-__CC__-AP-2\",\"clientDescription\":\"Scanner-HH-02\",\"description\":\"802.1X EAP authentication succeeded\",\"eventData\":{\"identity\":\"scanner_svc_02\",\"client_mac\":\"b8:27:eb:d2:__MAC__:02\",\"client_ip\":\"172.16.__IPO__.22\"}}"
+      },
+      {
+        "id": "meraki-ap3-auth-camera3",
+        "sourcetype": "meraki:accesspoints",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_auth\",\"deviceSerial\":\"Q2KD-KL__S3__-C003\",\"deviceName\":\"KL-__S3__-__CC__-AP-3\",\"clientDescription\":\"IoT-Camera-03\",\"clientMac\":\"dc:a6:32:e3:__MAC__:10\",\"description\":\"WPA authentication successful\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":44,\"rssi\":%%RSSI_OK%%}"
+      },
+      {
+        "id": "meraki-ap1-rf-change",
+        "sourcetype": "meraki:accesspoints",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"rf_change\",\"deviceSerial\":\"Q2KD-KL__S3__-C001\",\"deviceName\":\"KL-__S3__-__CC__-AP-1\",\"description\":\"RF environment changed\",\"eventData\":{\"band\":\"5 GHz\",\"channel\":36,\"power\":17,\"interference_pct\":8,\"utilization_pct\":22}}"
+      },
+      {
+        "_comment": "\u2500\u2500 Meraki Switches (4 templates) \u2500\u2500"
+      },
+      {
+        "id": "meraki-s001-port-healthy",
+        "sourcetype": "meraki:switches",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"port_status\",\"deviceSerial\":\"Q2KD-KL__S3__-S001\",\"deviceName\":\"KL-__S3__-__CC__-MS-1\",\"description\":\"Port status changed\",\"eventData\":{\"port\":\"3\",\"old\":\"up\",\"new\":\"up\"}}"
+      },
+      {
+        "id": "meraki-s001-poe-healthy",
+        "sourcetype": "meraki:switches",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"poe_budget_change\",\"deviceSerial\":\"Q2KD-KL__S3__-S001\",\"deviceName\":\"KL-__S3__-__CC__-MS-1\",\"description\":\"PoE budget updated\",\"eventData\":{\"used_watts\":%%POE_USED%%,\"total_watts\":370,\"remaining_watts_pct\":55}}"
+      },
+      {
+        "id": "meraki-s002-port-healthy",
+        "sourcetype": "meraki:switches",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"port_status\",\"deviceSerial\":\"Q2KD-KL__S3__-S002\",\"deviceName\":\"KL-__S3__-__CC__-MS-2\",\"description\":\"Port status changed\",\"eventData\":{\"port\":\"2\",\"old\":\"up\",\"new\":\"up\"}}"
+      },
+      {
+        "id": "meraki-s002-poe-healthy",
+        "sourcetype": "meraki:switches",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"poe_budget_change\",\"deviceSerial\":\"Q2KD-KL__S3__-S002\",\"deviceName\":\"KL-__S3__-__CC__-MS-2\",\"description\":\"PoE budget updated\",\"eventData\":{\"used_watts\":%%POE_USED%%,\"total_watts\":370,\"remaining_watts_pct\":62}}"
+      },
+      {
+        "_comment": "\u2500\u2500 Meraki Security Appliance (4 templates) \u2500\u2500"
+      },
+      {
+        "id": "meraki-mx-vpn-healthy",
+        "sourcetype": "meraki:securityappliances",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"vpn_registry_change\",\"deviceSerial\":\"Q2KD-KL__S3__-X001\",\"deviceName\":\"KL-__S3__-__CC__-MX-1\",\"description\":\"VPN connectivity change\",\"eventData\":{\"peer\":\"DC-HUB-MX-1\",\"connectivity\":\"true\"}}"
+      },
+      {
+        "id": "meraki-mx-dhcp-healthy",
+        "sourcetype": "meraki:securityappliances",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"dhcp_lease\",\"deviceSerial\":\"Q2KD-KL__S3__-X001\",\"deviceName\":\"KL-__S3__-__CC__-MX-1\",\"description\":\"DHCP lease granted\",\"eventData\":{\"ip\":\"172.16.__IPO__.21\",\"mac\":\"b8:27:eb:d2:__MAC__:01\",\"server_ip\":\"172.16.__IPO__.1\",\"server_mac\":\"Q2KD-KL__S3__-X001\",\"subnet\":\"172.16.__IPO__.0/24\",\"duration\":86400}}"
+      },
+      {
+        "id": "meraki-mx-fw-allow",
+        "sourcetype": "meraki:securityappliances",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"firewall_allow\",\"deviceSerial\":\"Q2KD-KL__S3__-X001\",\"deviceName\":\"KL-__S3__-__CC__-MX-1\",\"description\":\"Firewall rule allowed traffic\",\"eventData\":{\"src_ip\":\"172.16.__IPO__.21\",\"dst_ip\":\"10.200.1.10\",\"dst_port\":443,\"protocol\":\"tcp\",\"rule\":\"allow-pos-to-gateway\",\"bytes\":1284}}"
+      },
+      {
+        "id": "meraki-mx-content-filter",
+        "sourcetype": "meraki:securityappliances",
+        "source": "meraki",
+        "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"content_filtering\",\"deviceSerial\":\"Q2KD-KL__S3__-X001\",\"deviceName\":\"KL-__S3__-__CC__-MX-1\",\"description\":\"Content filtering event\",\"eventData\":{\"url\":\"https://updates.kinlei.corp/firmware\",\"action\":\"allow\",\"category\":\"Software Updates\",\"client_ip\":\"172.16.__IPO__.11\",\"client_mac\":\"Q2KD-KL__S3__-C001\"}}"
+      },
+      {
+        "_comment": "\u2500\u2500 SD-WAN (3 templates with variance) \u2500\u2500"
+      },
+      {
+        "id": "sdwan-tunnel-healthy",
+        "sourcetype": "cisco:sdwan:tunnelhealth",
+        "source": "cisco:sdwan:tunnelhealth",
+        "host_override": "kl-__S3__-__cc__-rtr-1",
+        "template": "{\"vdevice-name\":\"10.10.__IPO__.1\",\"vdevice-host-name\":\"kl-__S3__-__cc__-rtr-1\",\"name\":\"kl-__S3__-__cc__-rtr-1\",\"local_system_ip\":\"10.10.__IPO__.1\",\"remote_system_ip\":\"10.100.1.1\",\"local_color\":\"mpls\",\"remote_color\":\"mpls\",\"state\":\"up\",\"device-type\":\"vedge\",\"tx_octets\":%%TX_OCT%%,\"rx_octets\":%%RX_OCT%%,\"jitter\":%%JITTER%%,\"latency\":%%LATENCY%%,\"loss\":%%LOSS_ZERO%%,\"vqoe_score\":%%VQOE%%}"
+      },
+      {
+        "id": "sdwan-link-healthy",
+        "sourcetype": "cisco:sdwan:linkhealth",
+        "source": "cisco:sdwan:linkhealth",
+        "host_override": "kl-__S3__-__cc__-rtr-1",
+        "template": "{\"vdevice-name\":\"10.10.__IPO__.1\",\"ifname\":\"GigabitEthernet0/0/0\",\"ip-address\":\"10.10.__IPO__.1\",\"hwaddr\":\"00:1a:2b:c3:__MAC__:01\",\"af-type\":\"ipv4\",\"oper-status\":\"if-oper-state-ready\",\"tx-octets\":%%TX_OCT%%,\"rx-octets\":%%RX_OCT%%,\"tx-packets\":%%TX_PKT%%,\"rx-packets\":%%RX_PKT%%,\"color\":\"mpls\",\"encap\":\"ipsec\",\"vdevice-host-name\":\"kl-__S3__-__cc__-rtr-1\"}"
+      },
+      {
+        "id": "sdwan-site-healthy",
+        "sourcetype": "cisco:sdwan:sitehealth",
+        "source": "cisco:sdwan:sitehealth",
+        "host_override": "kl-__S3__-__cc__-rtr-1",
+        "template": "{\"vdevice-name\":\"10.10.__IPO__.1\",\"vdevice-host-name\":\"kl-__S3__-__cc__-rtr-1\",\"site-id\":\"10.10.__IPO__.1\",\"site-health\":\"good\",\"control-connections\":3,\"bfd-sessions-up\":2,\"bfd-sessions-down\":0,\"omp-peers-up\":2,\"omp-peers-down\":0,\"device-model\":\"C1111-8P\",\"device-status\":\"normal\",\"reachability\":\"reachable\",\"certificate-status\":\"installed\"}"
+      },
+      {
+        "_comment": "\u2500\u2500 ThousandEyes (4 templates with variance) \u2500\u2500"
+      },
+      {
+        "id": "te-alert-healthy",
+        "sourcetype": "cisco:thousandeyes:alerts",
+        "source": "thousandeyes://http_tests",
+        "template": "{\"alertState\":true,\"severity\":\"INFO\",\"testId\":200__S3__,\"testName\":\"KL-__S3__ POS Gateway - HTTP\",\"alert_type\":\"HTTP_SERVER\",\"site\":\"__CITY__\",\"metricsAtStart\":{\"responseTime\":%%RESP_MS%%,\"packetLoss\":%%LOSS_ZERO%%,\"jitter\":%%JITTER%%},\"alert\":{\"id\":\"TE-ALERT-STORE__S3__\",\"test\":{\"name\":\"KL-__S3__ POS Gateway - HTTP\"},\"rule\":{\"expression\":\"responseTime >= 200 ms\",\"name\":\"POS Gateway Latency\"},\"severity\":\"INFO\",\"targets\":[{\"agentName\":\"kl-te-__cc__-__S3__.kinlei.corp\",\"location\":\"__CITY__\"}],\"cleared\":true}}"
+      },
+      {
+        "id": "te-pathtrace-healthy",
+        "sourcetype": "cisco:thousandeyes:pathtrace",
+        "source": "thousandeyes://path_trace",
+        "template": "{\"type\":\"PATH_TRACE\",\"target\":\"10.200.1.10\",\"severity\":\"NONE\",\"active\":0,\"site\":\"__CITY__\",\"problemHop\":\"none\",\"problemNode\":\"none\",\"hopLatencyMs\":%%HOP_LAT%%,\"ispHopLatencyMs\":%%ISP_LAT%%,\"ispStatus\":\"healthy\",\"enterpriseEdgeStatus\":\"healthy\",\"conclusion\":\"All hops within threshold - no issues detected\",\"agents\":[{\"agentName\":\"kl-te-__cc__-__S3__.kinlei.corp\",\"location\":\"__CITY__\"}]}"
+      },
+      {
+        "id": "te-http-metric-healthy",
+        "sourcetype": "cisco:thousandeyes:http",
+        "source": "thousandeyes://http_tests",
+        "template": "{\"testId\":200__S3__,\"testName\":\"KL-__S3__ POS Gateway - HTTP\",\"type\":\"HTTP_SERVER\",\"severity\":\"NONE\",\"active\":0,\"site\":\"__CITY__\",\"metricsAtStart\":{\"responseTime\":%%RESP_MS%%,\"packetLoss\":%%LOSS_ZERO%%,\"jitter\":%%JITTER%%,\"errorType\":\"None\"},\"agents\":[{\"agentName\":\"kl-te-__cc__-__S3__.kinlei.corp\",\"location\":\"__CITY__\"}],\"summary\":\"HTTP response within threshold\"}"
+      },
+      {
+        "id": "te-bgp-healthy",
+        "sourcetype": "cisco:thousandeyes:bgp",
+        "source": "thousandeyes://bgp",
+        "template": "{\"prefix\":\"10.200.0.0/16\",\"reachabilityPct\":%%REACH_PCT%%,\"pathChanges\":%%PATH_CHG%%,\"status\":\"healthy\",\"monitorCount\":12,\"monitorsReachable\":12,\"active\":0,\"site\":\"__CITY__\",\"summary\":\"BGP prefix fully reachable from all monitors\"}"
+      },
+      {
+        "_comment": "\u2500\u2500 ISE (4 templates across both ISE hosts and different devices) \u2500\u2500"
+      },
+      {
+        "id": "ise-auth-w01-scanner1",
+        "sourcetype": "cisco:ise:syslog",
+        "source": "cisco:ise:syslog",
+        "host_override": "kl-ise-west-01.kinlei.corp",
+        "template": "TIMESTAMP_SYSLOG kl-ise-west-01.kinlei.corp CISE_Passed_Authentications __S6__0001 1 0 TIMESTAMP_SYSLOG INFO 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=73, Device IP Address=10.10.__IPO__.11, DestinationIPAddress=kl-ise-west-01.kinlei.corp, UserName=scanner_svc_01, Protocol=Radius, NAS-IP-Address=10.10.__IPO__.11, NAS-Port-Id=GigabitEthernet1/0/1, Service-Type=Framed, Framed-IP-Address=172.16.__IPO__.21, Called-Station-Id=00-1A-2B-C3-__MAC__-01:KL-SECURE, Calling-Station-Id=b8:27:eb:d2:__MAC__:01, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-01.kinlei.corp/__SN__0001/1, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=mab, SelectedAccessService=Default Network Access, UseCase=Host Lookup, NetworkDeviceName=KL-__S3__-AP"
+      },
+      {
+        "id": "ise-auth-w02-camera1",
+        "sourcetype": "cisco:ise:syslog",
+        "source": "cisco:ise:syslog",
+        "host_override": "kl-ise-west-02.kinlei.corp",
+        "template": "TIMESTAMP_SYSLOG kl-ise-west-02.kinlei.corp CISE_Passed_Authentications __S6__0010 1 0 TIMESTAMP_SYSLOG INFO 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=73, Device IP Address=10.10.__IPO__.11, DestinationIPAddress=kl-ise-west-02.kinlei.corp, UserName=iot_camera_01, Protocol=Radius, NAS-IP-Address=10.10.__IPO__.11, NAS-Port-Id=GigabitEthernet1/0/3, Service-Type=Framed, Framed-IP-Address=172.16.__IPO__.30, Called-Station-Id=Q2KD-KL__S3__-C001:KL-SECURE, Calling-Station-Id=dc:a6:32:e3:__MAC__:01, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-02.kinlei.corp/__SN__0010/1, AuthenticationIdentityStore=Internal Endpoints, AuthenticationMethod=mab, SelectedAccessService=Default Network Access, UseCase=Host Lookup, NetworkDeviceName=KL-__S3__-AP"
+      },
+      {
+        "id": "ise-auth-w01-pos",
+        "sourcetype": "cisco:ise:syslog",
+        "source": "cisco:ise:syslog",
+        "host_override": "kl-ise-west-01.kinlei.corp",
+        "template": "TIMESTAMP_SYSLOG kl-ise-west-01.kinlei.corp CISE_Passed_Authentications __S6__0020 1 0 TIMESTAMP_SYSLOG INFO 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=73, Device IP Address=10.10.__IPO__.13, DestinationIPAddress=kl-ise-west-01.kinlei.corp, UserName=pos_terminal_01, Protocol=Radius, NAS-IP-Address=10.10.__IPO__.13, NAS-Port-Id=GigabitEthernet1/0/4, Service-Type=Framed, Framed-IP-Address=172.16.__IPO__.40, Called-Station-Id=Q2KD-KL__S3__-C003:KL-SECURE, Calling-Station-Id=b8:27:eb:d2:__MAC__:03, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-01.kinlei.corp/__SN__0020/1, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=mab, SelectedAccessService=Default Network Access, UseCase=Host Lookup, NetworkDeviceName=KL-__S3__-AP"
+      },
+      {
+        "id": "ise-auth-w02-sensor",
+        "sourcetype": "cisco:ise:syslog",
+        "source": "cisco:ise:syslog",
+        "host_override": "kl-ise-west-02.kinlei.corp",
+        "template": "TIMESTAMP_SYSLOG kl-ise-west-02.kinlei.corp CISE_Passed_Authentications __S6__0030 1 0 TIMESTAMP_SYSLOG INFO 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=73, Device IP Address=10.10.__IPO__.13, DestinationIPAddress=kl-ise-west-02.kinlei.corp, UserName=iot_sensor_temp_01, Protocol=Radius, NAS-IP-Address=10.10.__IPO__.13, NAS-Port-Id=GigabitEthernet1/0/2, Service-Type=Framed, Framed-IP-Address=172.16.__IPO__.50, Called-Station-Id=Q2KD-KL__S3__-C003:KL-IOT, Calling-Station-Id=dc:a6:32:e3:__MAC__:03, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-02.kinlei.corp/__SN__0030/1, AuthenticationIdentityStore=Internal Endpoints, AuthenticationMethod=mab, SelectedAccessService=Default Network Access, UseCase=Host Lookup, NetworkDeviceName=KL-__S3__-AP"
+      }
+    ]
+  },
+  "faults": {
+    "wan_transport_failure": {
+      "_description": "MPLS WAN link goes down. SD-WAN fails over to LTE. Cascading degradation across all domains.",
+      "mutex_group": "wan",
+      "phases": [
+        {
+          "phase": 1,
+          "name": "WAN Transport Down",
+          "delay_seconds": 0,
+          "description": "MPLS BFD session fails. SD-WAN router begins LTE failover.",
+          "events": [
+            {
+              "id": "sdwan-tunnel-mpls-down",
+              "sourcetype": "cisco:sdwan:tunnelhealth",
+              "source": "cisco:sdwan:tunnelhealth",
+              "host_override": "kl-__S3__-__cc__-rtr-1",
+              "template": "{\"vdevice-name\":\"10.10.__IPO__.1\",\"vdevice-host-name\":\"kl-__S3__-__cc__-rtr-1\",\"name\":\"kl-__S3__-__cc__-rtr-1\",\"local_system_ip\":\"10.10.__IPO__.1\",\"remote_system_ip\":\"10.100.1.1\",\"local_color\":\"mpls\",\"remote_color\":\"mpls\",\"state\":\"down\",\"device-type\":\"vedge\",\"tx_octets\":0,\"rx_octets\":0,\"jitter\":0,\"latency\":0,\"loss\":100,\"vqoe_score\":0}"
+            },
+            {
+              "id": "sdwan-site-degraded",
+              "sourcetype": "cisco:sdwan:sitehealth",
+              "source": "cisco:sdwan:sitehealth",
+              "host_override": "kl-__S3__-__cc__-rtr-1",
+              "template": "{\"vdevice-name\":\"10.10.__IPO__.1\",\"vdevice-host-name\":\"kl-__S3__-__cc__-rtr-1\",\"site-id\":\"10.10.__IPO__.1\",\"site-health\":\"degraded\",\"control-connections\":1,\"bfd-sessions-up\":1,\"bfd-sessions-down\":1,\"omp-peers-up\":1,\"omp-peers-down\":1,\"device-model\":\"C1111-8P\",\"device-status\":\"degraded\",\"reachability\":\"reachable\",\"certificate-status\":\"installed\"}"
+            },
+            {
+              "id": "sdwan-tunnel-lte-active",
+              "sourcetype": "cisco:sdwan:tunnelhealth",
+              "source": "cisco:sdwan:tunnelhealth",
+              "host_override": "kl-__S3__-__cc__-rtr-1",
+              "template": "{\"vdevice-name\":\"10.10.__IPO__.1\",\"vdevice-host-name\":\"kl-__S3__-__cc__-rtr-1\",\"name\":\"kl-__S3__-__cc__-rtr-1\",\"local_system_ip\":\"10.10.__IPO__.1\",\"remote_system_ip\":\"10.100.1.1\",\"local_color\":\"lte\",\"remote_color\":\"lte\",\"state\":\"up\",\"device-type\":\"vedge\",\"tx_octets\":180000,\"rx_octets\":120000,\"jitter\":35,\"latency\":85,\"loss\":2,\"vqoe_score\":3}"
+            }
+          ]
+        },
+        {
+          "phase": 2,
+          "name": "ThousandEyes Latency Alert",
+          "delay_seconds": 30,
+          "description": "TE HTTP tests detect elevated latency on LTE backup. Alert fires.",
+          "events": [
+            {
+              "id": "te-alert-firing",
+              "sourcetype": "cisco:thousandeyes:alerts",
+              "source": "thousandeyes://http_tests",
+              "template": "{\"alertState\":false,\"severity\":\"MAJOR\",\"testId\":200__S3__,\"testName\":\"KL-__S3__ POS Gateway - HTTP\",\"alert_type\":\"HTTP_SERVER\",\"site\":\"__CITY__\",\"metricsAtStart\":{\"responseTime\":580,\"packetLoss\":3.5,\"jitter\":42},\"alert\":{\"id\":\"TE-ALERT-STORE__S3__-WAN\",\"test\":{\"name\":\"KL-__S3__ POS Gateway - HTTP\"},\"rule\":{\"expression\":\"responseTime >= 200 ms\",\"name\":\"POS Gateway Latency\"},\"severity\":\"MAJOR\",\"targets\":[{\"agentName\":\"kl-te-__cc__-__S3__.kinlei.corp\",\"location\":\"__CITY__\"}],\"cleared\":false}}"
+            },
+            {
+              "id": "te-http-degraded",
+              "sourcetype": "cisco:thousandeyes:http",
+              "source": "thousandeyes://http_tests",
+              "template": "{\"testId\":200__S3__,\"testName\":\"KL-__S3__ POS Gateway - HTTP\",\"type\":\"HTTP_SERVER\",\"severity\":\"MAJOR\",\"active\":1,\"site\":\"__CITY__\",\"metricsAtStart\":{\"responseTime\":580,\"packetLoss\":3.5,\"jitter\":42,\"errorType\":\"None\"},\"agents\":[{\"agentName\":\"kl-te-__cc__-__S3__.kinlei.corp\",\"location\":\"__CITY__\"}],\"summary\":\"HTTP response time 580ms exceeds 200ms threshold \u2014 LTE backup saturated\"}"
+            },
+            {
+              "id": "te-pathtrace-problem",
+              "sourcetype": "cisco:thousandeyes:pathtrace",
+              "source": "thousandeyes://path_trace",
+              "template": "{\"type\":\"PATH_TRACE\",\"target\":\"10.200.1.10\",\"severity\":\"MAJOR\",\"active\":1,\"site\":\"__CITY__\",\"problemHop\":\"lte-gw-pdx-01.carrier.net\",\"problemNode\":\"lte-gw-pdx-01.carrier.net\",\"hopLatencyMs\":120,\"ispHopLatencyMs\":95,\"ispStatus\":\"degraded\",\"enterpriseEdgeStatus\":\"healthy\",\"conclusion\":\"Elevated latency at LTE carrier gateway \u2014 enterprise edge healthy, ISP/carrier layer degraded due to bandwidth saturation\",\"agents\":[{\"agentName\":\"kl-te-__cc__-__S3__.kinlei.corp\",\"location\":\"__CITY__\"}]}"
+            }
+          ]
+        },
+        {
+          "phase": 3,
+          "name": "Meraki In-Store Degradation",
+          "delay_seconds": 60,
+          "description": "LTE can't handle aggregate bandwidth. APs shed low-priority clients. Switches see port flaps.",
+          "events": [
+            {
+              "id": "meraki-ap-deauth-camera1",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_deauth\",\"deviceSerial\":\"Q2KD-KL__S3__-C001\",\"deviceName\":\"KL-__S3__-__CC__-AP-1\",\"clientDescription\":\"IoT-Camera-01\",\"clientMac\":\"dc:a6:32:e3:__MAC__:01\",\"description\":\"WPA deauthentication\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":36}"
+            },
+            {
+              "id": "meraki-ap-deauth-camera2",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_deauth\",\"deviceSerial\":\"Q2KD-KL__S3__-C002\",\"deviceName\":\"KL-__S3__-__CC__-AP-2\",\"clientDescription\":\"IoT-Camera-02\",\"clientMac\":\"dc:a6:32:e3:__MAC__:02\",\"description\":\"WPA deauthentication\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":40}"
+            },
+            {
+              "id": "meraki-ap-deauth-sensor",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_deauth\",\"deviceSerial\":\"Q2KD-KL__S3__-C003\",\"deviceName\":\"KL-__S3__-__CC__-AP-3\",\"clientDescription\":\"IoT-Sensor-Temp-01\",\"clientMac\":\"dc:a6:32:e3:__MAC__:03\",\"description\":\"WPA deauthentication\",\"ssid\":\"KL-IOT\",\"band\":\"2.4 GHz\",\"channel\":6}"
+            },
+            {
+              "id": "meraki-switch-port-flap-pos",
+              "sourcetype": "meraki:switches",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"port_bounce\",\"deviceSerial\":\"Q2KD-KL__S3__-S001\",\"deviceName\":\"KL-__S3__-__CC__-MS-1\",\"description\":\"Port bounce detected\",\"eventData\":{\"ports\":\"3,4,7\"}}"
+            },
+            {
+              "id": "meraki-mx-dhcp-fail",
+              "sourcetype": "meraki:securityappliances",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"dhcp_problem\",\"deviceSerial\":\"Q2KD-KL__S3__-X001\",\"deviceName\":\"KL-__S3__-__CC__-MX-1\",\"description\":\"DHCP problem detected\",\"eventData\":{\"extra\":\"DHCP relay timeout \u2014 upstream unreachable via LTE\",\"vap\":\"0\",\"vlan\":\"47\"}}"
+            }
+          ]
+        },
+        {
+          "phase": 4,
+          "name": "ISE Authentication Failures",
+          "delay_seconds": 90,
+          "description": "Scanners attempting re-auth through degraded LTE link hit RADIUS timeouts.",
+          "events": [
+            {
+              "id": "ise-auth-fail-scanner1",
+              "sourcetype": "cisco:ise:syslog",
+              "source": "cisco:ise:syslog",
+              "host_override": "kl-ise-west-01.kinlei.corp",
+              "template": "TIMESTAMP_SYSLOG kl-ise-west-01.kinlei.corp CISE_Failed_Attempts __S6__0100 1 0 TIMESTAMP_SYSLOG WARN 5400 NOTICE Failed-Attempt: Authentication failed, ConfigVersionId=73, Device IP Address=10.10.__IPO__.11, DestinationIPAddress=kl-ise-west-01.kinlei.corp, UserName=scanner_svc_01, Protocol=Radius, NAS-IP-Address=10.10.__IPO__.11, NAS-Port-Id=GigabitEthernet1/0/1, Service-Type=Framed, Called-Station-Id=00-1A-2B-C3-__MAC__-01:KL-SECURE, Calling-Station-Id=b8:27:eb:d2:__MAC__:01, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-01.kinlei.corp/__SN__0100/1, FailureReason=11036 The Message-Authenticator RADIUS attribute is invalid, NetworkDeviceName=KL-__S3__-AP, DetailedInfo=Authentication failed due to RADIUS timeout - WAN link degraded"
+            },
+            {
+              "id": "ise-auth-fail-scanner2",
+              "sourcetype": "cisco:ise:syslog",
+              "source": "cisco:ise:syslog",
+              "host_override": "kl-ise-west-01.kinlei.corp",
+              "template": "TIMESTAMP_SYSLOG kl-ise-west-01.kinlei.corp CISE_Failed_Attempts __S6__0101 1 0 TIMESTAMP_SYSLOG WARN 5400 NOTICE Failed-Attempt: Authentication failed, ConfigVersionId=73, Device IP Address=10.10.__IPO__.11, DestinationIPAddress=kl-ise-west-01.kinlei.corp, UserName=scanner_svc_02, Protocol=Radius, NAS-IP-Address=10.10.__IPO__.11, NAS-Port-Id=GigabitEthernet1/0/2, Service-Type=Framed, Called-Station-Id=00-1A-2B-C3-__MAC__-02:KL-SECURE, Calling-Station-Id=b8:27:eb:d2:__MAC__:02, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-01.kinlei.corp/__SN__0101/1, FailureReason=11036 The Message-Authenticator RADIUS attribute is invalid, NetworkDeviceName=KL-__S3__-AP, DetailedInfo=Authentication failed due to RADIUS timeout - WAN link degraded"
+            },
+            {
+              "id": "ise-auth-fail-pos",
+              "sourcetype": "cisco:ise:syslog",
+              "source": "cisco:ise:syslog",
+              "host_override": "kl-ise-west-01.kinlei.corp",
+              "template": "TIMESTAMP_SYSLOG kl-ise-west-01.kinlei.corp CISE_Failed_Attempts __S6__0102 1 0 TIMESTAMP_SYSLOG WARN 5400 NOTICE Failed-Attempt: Authentication failed, ConfigVersionId=73, Device IP Address=10.10.__IPO__.12, DestinationIPAddress=kl-ise-west-01.kinlei.corp, UserName=pos_svc_account, Protocol=Radius, NAS-IP-Address=10.10.__IPO__.12, NAS-Port-Id=GigabitEthernet1/0/3, Service-Type=Framed, Called-Station-Id=00-1A-2B-C3-__MAC__-02:KL-SECURE, Calling-Station-Id=a4:5e:60:c1:__MAC__:03, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-01.kinlei.corp/__SN__0102/1, FailureReason=11036 The Message-Authenticator RADIUS attribute is invalid, NetworkDeviceName=KL-__S3__-AP, DetailedInfo=Authentication failed due to RADIUS timeout - WAN link degraded"
+            }
+          ]
+        }
+      ]
+    },
+    "ap_hardware_failure": {
+      "_description": "AP-2 hardware failure. Single AP dies \u2014 clients deauth then roam to surviving APs. WAN and switches stay healthy. Root cause: AP hardware, not upstream.",
+      "mutex_group": "switch_ap_overlap",
+      "phases": [
+        {
+          "phase": 1,
+          "name": "AP-2 Offline",
+          "delay_seconds": 0,
+          "description": "AP-2 stops responding. Meraki cloud detects device offline. Switch port for AP-2 link goes down.",
+          "events": [
+            {
+              "id": "ap-fail-ap2-offline",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"device_offline\",\"deviceSerial\":\"Q2KD-KL__S3__-C002\",\"deviceName\":\"KL-__S3__-__CC__-AP-2\",\"description\":\"Access point is offline \u2014 no heartbeat received for 120 seconds\",\"eventData\":{\"lastSeen\":\"TIMESTAMP_ISO\",\"uptimeSeconds\":432870}}"
+            },
+            {
+              "id": "ap-fail-switch-port-down",
+              "sourcetype": "meraki:switches",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"port_status\",\"deviceSerial\":\"Q2KD-KL__S3__-S001\",\"deviceName\":\"KL-__S3__-__CC__-MS-1\",\"description\":\"Port status changed\",\"eventData\":{\"port\":\"5\",\"old\":\"up\",\"new\":\"down\"}}"
+            }
+          ]
+        },
+        {
+          "phase": 2,
+          "name": "Client Deauthentications",
+          "delay_seconds": 15,
+          "description": "Clients connected to AP-2 are deauthenticated. Camera and scanner lose connectivity.",
+          "events": [
+            {
+              "id": "ap-fail-deauth-camera2",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_deauth\",\"deviceSerial\":\"Q2KD-KL__S3__-C002\",\"deviceName\":\"KL-__S3__-__CC__-AP-2\",\"clientDescription\":\"IoT-Camera-02\",\"clientMac\":\"dc:a6:32:e3:__MAC__:02\",\"description\":\"WPA deauthentication \u2014 AP unreachable\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":40}"
+            },
+            {
+              "id": "ap-fail-deauth-scanner2",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_deauth\",\"deviceSerial\":\"Q2KD-KL__S3__-C002\",\"deviceName\":\"KL-__S3__-__CC__-AP-2\",\"clientDescription\":\"Scanner-02\",\"clientMac\":\"b8:27:eb:d2:__MAC__:02\",\"description\":\"WPA deauthentication \u2014 AP unreachable\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":40}"
+            }
+          ]
+        },
+        {
+          "phase": 3,
+          "name": "Client Roaming",
+          "delay_seconds": 30,
+          "description": "Displaced clients roam to AP-1 and AP-3. ISE re-authenticates them successfully. RSSI is lower (farther from original AP).",
+          "events": [
+            {
+              "id": "ap-fail-roam-camera2-to-ap1",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_auth\",\"deviceSerial\":\"Q2KD-KL__S3__-C001\",\"deviceName\":\"KL-__S3__-__CC__-AP-1\",\"clientDescription\":\"IoT-Camera-02\",\"clientMac\":\"dc:a6:32:e3:__MAC__:02\",\"description\":\"WPA authentication \u2014 roamed from KL-__S3__-__CC__-AP-2\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":36,\"rssi\":-74}"
+            },
+            {
+              "id": "ap-fail-roam-scanner2-to-ap3",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_auth\",\"deviceSerial\":\"Q2KD-KL__S3__-C003\",\"deviceName\":\"KL-__S3__-__CC__-AP-3\",\"clientDescription\":\"Scanner-02\",\"clientMac\":\"b8:27:eb:d2:__MAC__:02\",\"description\":\"WPA authentication \u2014 roamed from KL-__S3__-__CC__-AP-2\",\"ssid\":\"KL-SECURE\",\"band\":\"2.4 GHz\",\"channel\":6,\"rssi\":-71}"
+            },
+            {
+              "id": "ap-fail-ise-reauth-camera2",
+              "sourcetype": "cisco:ise:syslog",
+              "source": "cisco:ise:syslog",
+              "host_override": "kl-ise-west-01.kinlei.corp",
+              "template": "TIMESTAMP_SYSLOG kl-ise-west-01.kinlei.corp CISE_Passed_Authentications __S6__0200 1 0 TIMESTAMP_SYSLOG INFO 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=73, Device IP Address=10.10.__IPO__.11, DestinationIPAddress=kl-ise-west-01.kinlei.corp, UserName=iot_camera_02, Protocol=Radius, NAS-IP-Address=10.10.__IPO__.11, NAS-Port-Id=GigabitEthernet1/0/1, Service-Type=Framed, Framed-IP-Address=172.16.__IPO__.32, Called-Station-Id=Q2KD-KL__S3__-C001:KL-SECURE, Calling-Station-Id=dc:a6:32:e3:__MAC__:02, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-01.kinlei.corp/__SN__0200/1, AuthenticationIdentityStore=Internal Endpoints, AuthenticationMethod=mab, SelectedAccessService=Default Network Access, UseCase=Host Lookup, NetworkDeviceName=KL-__S3__-AP, DetailedInfo=Client roamed from KL-__S3__-__CC__-AP-2 to KL-__S3__-__CC__-AP-1"
+            },
+            {
+              "id": "ap-fail-ise-reauth-scanner2",
+              "sourcetype": "cisco:ise:syslog",
+              "source": "cisco:ise:syslog",
+              "host_override": "kl-ise-west-01.kinlei.corp",
+              "template": "TIMESTAMP_SYSLOG kl-ise-west-01.kinlei.corp CISE_Passed_Authentications __S6__0201 1 0 TIMESTAMP_SYSLOG INFO 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=73, Device IP Address=10.10.__IPO__.13, DestinationIPAddress=kl-ise-west-01.kinlei.corp, UserName=scanner_svc_02, Protocol=Radius, NAS-IP-Address=10.10.__IPO__.13, NAS-Port-Id=GigabitEthernet1/0/1, Service-Type=Framed, Framed-IP-Address=172.16.__IPO__.33, Called-Station-Id=Q2KD-KL__S3__-C003:KL-SECURE, Calling-Station-Id=b8:27:eb:d2:__MAC__:02, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-01.kinlei.corp/__SN__0201/1, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=mab, SelectedAccessService=Default Network Access, UseCase=Host Lookup, NetworkDeviceName=KL-__S3__-AP, DetailedInfo=Client roamed from KL-__S3__-__CC__-AP-2 to KL-__S3__-__CC__-AP-3"
+            }
+          ]
+        }
+      ]
+    },
+    "ise_policy_rejection": {
+      "_description": "ISE certificate/policy rejection. IoT devices fail 802.1X because of an expired or untrusted client certificate. ISE is reachable and responding \u2014 it is actively rejecting. WAN healthy, all APs up.",
+      "mutex_group": null,
+      "phases": [
+        {
+          "phase": 1,
+          "name": "Certificate Rejections Begin",
+          "delay_seconds": 0,
+          "description": "First devices fail EAP-TLS handshake. ISE rejects due to unknown CA in client certificate chain (expired intermediate CA).",
+          "events": [
+            {
+              "id": "ise-cert-fail-camera1",
+              "sourcetype": "cisco:ise:syslog",
+              "source": "cisco:ise:syslog",
+              "host_override": "kl-ise-west-01.kinlei.corp",
+              "template": "TIMESTAMP_SYSLOG kl-ise-west-01.kinlei.corp CISE_Failed_Attempts __S6__0300 1 0 TIMESTAMP_SYSLOG WARN 5400 NOTICE Failed-Attempt: Authentication failed, ConfigVersionId=73, Device IP Address=10.10.__IPO__.11, DestinationIPAddress=kl-ise-west-01.kinlei.corp, UserName=iot_camera_01, Protocol=Radius, RequestLatency=12, NAS-IP-Address=10.10.__IPO__.11, NAS-Port-Id=GigabitEthernet1/0/3, Service-Type=Framed, Called-Station-Id=Q2KD-KL__S3__-C001:KL-SECURE, Calling-Station-Id=dc:a6:32:e3:__MAC__:01, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-01.kinlei.corp/__SN__0300/1, FailureReason=12514 EAP-TLS failed SSL/TLS handshake because of an unknown CA in the client certificates chain, NetworkDeviceName=KL-__S3__-AP, DetailedInfo=Client certificate issued by expired intermediate CA \u2014 cert CN=iot_camera_01.kinlei.corp expired 2026-04-15"
+            },
+            {
+              "id": "ise-cert-fail-scanner1",
+              "sourcetype": "cisco:ise:syslog",
+              "source": "cisco:ise:syslog",
+              "host_override": "kl-ise-west-01.kinlei.corp",
+              "template": "TIMESTAMP_SYSLOG kl-ise-west-01.kinlei.corp CISE_Failed_Attempts __S6__0301 1 0 TIMESTAMP_SYSLOG WARN 5400 NOTICE Failed-Attempt: Authentication failed, ConfigVersionId=73, Device IP Address=10.10.__IPO__.11, DestinationIPAddress=kl-ise-west-01.kinlei.corp, UserName=scanner_svc_01, Protocol=Radius, RequestLatency=11, NAS-IP-Address=10.10.__IPO__.11, NAS-Port-Id=GigabitEthernet1/0/1, Service-Type=Framed, Called-Station-Id=Q2KD-KL__S3__-C001:KL-SECURE, Calling-Station-Id=b8:27:eb:d2:__MAC__:01, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-01.kinlei.corp/__SN__0301/1, FailureReason=12514 EAP-TLS failed SSL/TLS handshake because of an unknown CA in the client certificates chain, NetworkDeviceName=KL-__S3__-AP, DetailedInfo=Client certificate issued by expired intermediate CA \u2014 cert CN=scanner_svc_01.kinlei.corp expired 2026-04-15"
+            },
+            {
+              "id": "ise-cert-fail-sensor",
+              "sourcetype": "cisco:ise:syslog",
+              "source": "cisco:ise:syslog",
+              "host_override": "kl-ise-west-02.kinlei.corp",
+              "template": "TIMESTAMP_SYSLOG kl-ise-west-02.kinlei.corp CISE_Failed_Attempts __S6__0302 1 0 TIMESTAMP_SYSLOG WARN 5400 NOTICE Failed-Attempt: Authentication failed, ConfigVersionId=73, Device IP Address=10.10.__IPO__.13, DestinationIPAddress=kl-ise-west-02.kinlei.corp, UserName=iot_sensor_temp_01, Protocol=Radius, RequestLatency=14, NAS-IP-Address=10.10.__IPO__.13, NAS-Port-Id=GigabitEthernet1/0/2, Service-Type=Framed, Called-Station-Id=Q2KD-KL__S3__-C003:KL-IOT, Calling-Station-Id=dc:a6:32:e3:__MAC__:03, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-02.kinlei.corp/__SN__0302/1, FailureReason=12514 EAP-TLS failed SSL/TLS handshake because of an unknown CA in the client certificates chain, NetworkDeviceName=KL-__S3__-AP, DetailedInfo=Client certificate issued by expired intermediate CA \u2014 cert CN=iot_sensor_temp_01.kinlei.corp expired 2026-04-15"
+            }
+          ]
+        },
+        {
+          "phase": 2,
+          "name": "More Devices Fail \u2014 Pattern Confirmed",
+          "delay_seconds": 20,
+          "description": "Additional IoT devices fail with the same certificate error. AP-1 deauths a client that failed 802.1X. Pattern is now clearly policy/cert, not connectivity.",
+          "events": [
+            {
+              "id": "ise-cert-fail-pos1",
+              "sourcetype": "cisco:ise:syslog",
+              "source": "cisco:ise:syslog",
+              "host_override": "kl-ise-west-01.kinlei.corp",
+              "template": "TIMESTAMP_SYSLOG kl-ise-west-01.kinlei.corp CISE_Failed_Attempts __S6__0303 1 0 TIMESTAMP_SYSLOG WARN 5400 NOTICE Failed-Attempt: Authentication failed, ConfigVersionId=73, Device IP Address=10.10.__IPO__.13, DestinationIPAddress=kl-ise-west-01.kinlei.corp, UserName=pos_terminal_01, Protocol=Radius, RequestLatency=10, NAS-IP-Address=10.10.__IPO__.13, NAS-Port-Id=GigabitEthernet1/0/4, Service-Type=Framed, Called-Station-Id=Q2KD-KL__S3__-C003:KL-SECURE, Calling-Station-Id=b8:27:eb:d2:__MAC__:03, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-01.kinlei.corp/__SN__0303/1, FailureReason=12514 EAP-TLS failed SSL/TLS handshake because of an unknown CA in the client certificates chain, NetworkDeviceName=KL-__S3__-AP, DetailedInfo=Client certificate issued by expired intermediate CA \u2014 cert CN=pos_terminal_01.kinlei.corp expired 2026-04-15"
+            },
+            {
+              "id": "ise-cert-fail-scanner2",
+              "sourcetype": "cisco:ise:syslog",
+              "source": "cisco:ise:syslog",
+              "host_override": "kl-ise-west-02.kinlei.corp",
+              "template": "TIMESTAMP_SYSLOG kl-ise-west-02.kinlei.corp CISE_Failed_Attempts __S6__0304 1 0 TIMESTAMP_SYSLOG WARN 5400 NOTICE Failed-Attempt: Authentication failed, ConfigVersionId=73, Device IP Address=10.10.__IPO__.12, DestinationIPAddress=kl-ise-west-02.kinlei.corp, UserName=scanner_svc_02, Protocol=Radius, RequestLatency=13, NAS-IP-Address=10.10.__IPO__.12, NAS-Port-Id=GigabitEthernet1/0/2, Service-Type=Framed, Called-Station-Id=Q2KD-KL__S3__-C002:KL-SECURE, Calling-Station-Id=b8:27:eb:d2:__MAC__:02, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-02.kinlei.corp/__SN__0304/1, FailureReason=12514 EAP-TLS failed SSL/TLS handshake because of an unknown CA in the client certificates chain, NetworkDeviceName=KL-__S3__-AP, DetailedInfo=Client certificate issued by expired intermediate CA \u2014 cert CN=scanner_svc_02.kinlei.corp expired 2026-04-15"
+            },
+            {
+              "id": "ise-cert-ap-deauth-camera1",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_deauth\",\"deviceSerial\":\"Q2KD-KL__S3__-C001\",\"deviceName\":\"KL-__S3__-__CC__-AP-1\",\"clientDescription\":\"IoT-Camera-01\",\"clientMac\":\"dc:a6:32:e3:__MAC__:01\",\"description\":\"802.1X authentication failure \u2014 client deauthenticated by AP\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":36}"
+            }
+          ]
+        }
+      ]
+    },
+    "camera_wifi_flap": {
+      "_description": "Single camera on AP-3 flapping on/off WiFi due to coverage/interference. Low RSSI causes repeated deauth/reassociation cycle. Everything else healthy \u2014 subtle signal-level issue.",
+      "mutex_group": null,
+      "phases": [
+        {
+          "phase": 1,
+          "name": "Camera Disconnects",
+          "delay_seconds": 0,
+          "description": "Camera-03 in stockroom deauthenticates from AP-3 due to low signal. Meraki cameras sourcetype reports camera offline.",
+          "events": [
+            {
+              "id": "cam-flap-deauth-1",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_deauth\",\"deviceSerial\":\"Q2KD-KL__S3__-C003\",\"deviceName\":\"KL-__S3__-__CC__-AP-3\",\"clientDescription\":\"IoT-Camera-03\",\"clientMac\":\"dc:a6:32:e3:__MAC__:10\",\"description\":\"WPA deauthentication \u2014 client RSSI below threshold\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":44,\"rssi\":-85}"
+            },
+            {
+              "id": "cam-flap-camera-offline-1",
+              "sourcetype": "meraki:cameras",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"disconnect\",\"deviceSerial\":\"Q2KD-KL__S3__-V001\",\"deviceName\":\"KL-IoT-Camera-03\",\"description\":\"Camera disconnected from network\",\"eventData\":{\"lastRssi\":-85,\"associatedAp\":\"KL-__S3__-__CC__-AP-3\",\"uptimeBeforeDisconnect\":7230}}"
+            }
+          ]
+        },
+        {
+          "phase": 2,
+          "name": "Camera Reconnects (Weak Signal)",
+          "delay_seconds": 20,
+          "description": "Camera reassociates to AP-3 with marginal RSSI (-82 dBm). ISE re-authenticates successfully. Camera back online but signal is borderline.",
+          "events": [
+            {
+              "id": "cam-flap-reauth-1",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_auth\",\"deviceSerial\":\"Q2KD-KL__S3__-C003\",\"deviceName\":\"KL-__S3__-__CC__-AP-3\",\"clientDescription\":\"IoT-Camera-03\",\"clientMac\":\"dc:a6:32:e3:__MAC__:10\",\"description\":\"WPA authentication\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":44,\"rssi\":-82}"
+            },
+            {
+              "id": "cam-flap-camera-online-1",
+              "sourcetype": "meraki:cameras",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"connect\",\"deviceSerial\":\"Q2KD-KL__S3__-V001\",\"deviceName\":\"KL-IoT-Camera-03\",\"description\":\"Camera connected to network\",\"eventData\":{\"rssi\":-82,\"associatedAp\":\"KL-__S3__-__CC__-AP-3\",\"band\":\"5 GHz\"}}"
+            },
+            {
+              "id": "cam-flap-ise-reauth-1",
+              "sourcetype": "cisco:ise:syslog",
+              "source": "cisco:ise:syslog",
+              "host_override": "kl-ise-west-01.kinlei.corp",
+              "template": "TIMESTAMP_SYSLOG kl-ise-west-01.kinlei.corp CISE_Passed_Authentications __S6__0400 1 0 TIMESTAMP_SYSLOG INFO 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=73, Device IP Address=10.10.__IPO__.13, DestinationIPAddress=kl-ise-west-01.kinlei.corp, UserName=iot_camera_03, Protocol=Radius, NAS-IP-Address=10.10.__IPO__.13, NAS-Port-Id=GigabitEthernet1/0/5, Service-Type=Framed, Framed-IP-Address=172.16.__IPO__.110, Called-Station-Id=Q2KD-KL__S3__-C003:KL-SECURE, Calling-Station-Id=dc:a6:32:e3:__MAC__:10, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-01.kinlei.corp/__SN__0400/1, AuthenticationIdentityStore=Internal Endpoints, AuthenticationMethod=mab, SelectedAccessService=Default Network Access, UseCase=Host Lookup, NetworkDeviceName=KL-__S3__-AP"
+            }
+          ]
+        },
+        {
+          "phase": 3,
+          "name": "Camera Disconnects Again (Flap Cycle)",
+          "delay_seconds": 40,
+          "description": "Camera drops again \u2014 same low RSSI. The ongoing re-send loop will continuously cycle deauth/reconnect/deauth creating the repeating flap signature.",
+          "events": [
+            {
+              "id": "cam-flap-deauth-2",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_deauth\",\"deviceSerial\":\"Q2KD-KL__S3__-C003\",\"deviceName\":\"KL-__S3__-__CC__-AP-3\",\"clientDescription\":\"IoT-Camera-03\",\"clientMac\":\"dc:a6:32:e3:__MAC__:10\",\"description\":\"WPA deauthentication \u2014 client RSSI below threshold\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":44,\"rssi\":-86}"
+            },
+            {
+              "id": "cam-flap-camera-offline-2",
+              "sourcetype": "meraki:cameras",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"disconnect\",\"deviceSerial\":\"Q2KD-KL__S3__-V001\",\"deviceName\":\"KL-IoT-Camera-03\",\"description\":\"Camera disconnected from network\",\"eventData\":{\"lastRssi\":-86,\"associatedAp\":\"KL-__S3__-__CC__-AP-3\",\"uptimeBeforeDisconnect\":18}}"
+            }
+          ]
+        }
+      ]
+    },
+    "switch_failure": {
+      "_description": "Switch S001 complete failure. All ports go down, PoE drops to zero. Cascades to AP-1 and AP-2 losing uplink (both powered via S001). AP-3 survives on S002. SD-WAN and TE stay healthy.",
+      "mutex_group": "switch_ap_overlap",
+      "phases": [
+        {
+          "phase": 1,
+          "name": "Switch S001 Offline",
+          "delay_seconds": 0,
+          "description": "Switch S001 stops responding. All ports go down. PoE budget drops to zero watts.",
+          "events": [
+            {
+              "id": "sw-fail-s001-offline",
+              "sourcetype": "meraki:switches",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"device_offline\",\"deviceSerial\":\"Q2KD-KL__S3__-S001\",\"deviceName\":\"KL-__S3__-__CC__-MS-1\",\"description\":\"Switch is offline \u2014 no heartbeat received for 120 seconds\",\"eventData\":{\"lastSeen\":\"TIMESTAMP_ISO\",\"uptimeSeconds\":864210}}"
+            },
+            {
+              "id": "sw-fail-s001-ports-down",
+              "sourcetype": "meraki:switches",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"port_status\",\"deviceSerial\":\"Q2KD-KL__S3__-S001\",\"deviceName\":\"KL-__S3__-__CC__-MS-1\",\"description\":\"Multiple ports changed state\",\"eventData\":{\"port\":\"1-12\",\"old\":\"up\",\"new\":\"down\"}}"
+            },
+            {
+              "id": "sw-fail-s001-poe-zero",
+              "sourcetype": "meraki:switches",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"poe_budget_change\",\"deviceSerial\":\"Q2KD-KL__S3__-S001\",\"deviceName\":\"KL-__S3__-__CC__-MS-1\",\"description\":\"PoE budget updated\",\"eventData\":{\"used_watts\":0,\"total_watts\":370,\"remaining_watts_pct\":100}}"
+            }
+          ]
+        },
+        {
+          "phase": 2,
+          "name": "AP-1 and AP-2 Go Offline",
+          "delay_seconds": 20,
+          "description": "Both APs on S001 lose power and uplink. Clients on AP-1 and AP-2 are deauthenticated. AP-3 (on S002) stays healthy.",
+          "events": [
+            {
+              "id": "sw-fail-ap1-offline",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"device_offline\",\"deviceSerial\":\"Q2KD-KL__S3__-C001\",\"deviceName\":\"KL-__S3__-__CC__-AP-1\",\"description\":\"Access point is offline \u2014 PoE power lost\",\"eventData\":{\"lastSeen\":\"TIMESTAMP_ISO\",\"uptimeSeconds\":432870}}"
+            },
+            {
+              "id": "sw-fail-ap2-offline",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"device_offline\",\"deviceSerial\":\"Q2KD-KL__S3__-C002\",\"deviceName\":\"KL-__S3__-__CC__-AP-2\",\"description\":\"Access point is offline \u2014 PoE power lost\",\"eventData\":{\"lastSeen\":\"TIMESTAMP_ISO\",\"uptimeSeconds\":432650}}"
+            },
+            {
+              "id": "sw-fail-deauth-camera1",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_deauth\",\"deviceSerial\":\"Q2KD-KL__S3__-C001\",\"deviceName\":\"KL-__S3__-__CC__-AP-1\",\"clientDescription\":\"IoT-Camera-01\",\"clientMac\":\"dc:a6:32:e3:__MAC__:01\",\"description\":\"WPA deauthentication \u2014 AP power lost\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":36}"
+            },
+            {
+              "id": "sw-fail-deauth-camera2",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_deauth\",\"deviceSerial\":\"Q2KD-KL__S3__-C002\",\"deviceName\":\"KL-__S3__-__CC__-AP-2\",\"clientDescription\":\"IoT-Camera-02\",\"clientMac\":\"dc:a6:32:e3:__MAC__:02\",\"description\":\"WPA deauthentication \u2014 AP power lost\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":40}"
+            },
+            {
+              "id": "sw-fail-deauth-scanner1",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_deauth\",\"deviceSerial\":\"Q2KD-KL__S3__-C001\",\"deviceName\":\"KL-__S3__-__CC__-AP-1\",\"clientDescription\":\"Scanner-01\",\"clientMac\":\"b8:27:eb:d2:__MAC__:01\",\"description\":\"WPA deauthentication \u2014 AP power lost\",\"ssid\":\"KL-SECURE\",\"band\":\"5 GHz\",\"channel\":36}"
+            }
+          ]
+        },
+        {
+          "phase": 3,
+          "name": "ISE Timeouts and Partial Roaming",
+          "delay_seconds": 40,
+          "description": "ISE sees auth timeouts for devices that were on S001's APs. Scanner-01 roams to AP-3 successfully. Camera-01 is out of range.",
+          "events": [
+            {
+              "id": "sw-fail-ise-timeout-camera1",
+              "sourcetype": "cisco:ise:syslog",
+              "source": "cisco:ise:syslog",
+              "host_override": "kl-ise-west-01.kinlei.corp",
+              "template": "TIMESTAMP_SYSLOG kl-ise-west-01.kinlei.corp CISE_Failed_Attempts __S6__0500 1 0 TIMESTAMP_SYSLOG WARN 5400 NOTICE Failed-Attempt: Authentication failed, ConfigVersionId=73, Device IP Address=10.10.__IPO__.11, DestinationIPAddress=kl-ise-west-01.kinlei.corp, UserName=iot_camera_01, Protocol=Radius, NAS-IP-Address=10.10.__IPO__.11, NAS-Port-Id=GigabitEthernet1/0/3, Service-Type=Framed, Called-Station-Id=Q2KD-KL__S3__-C001:KL-SECURE, Calling-Station-Id=dc:a6:32:e3:__MAC__:01, NAS-Port-Type=Wireless-802.11, AcsSessionID=kl-ise-west-01.kinlei.corp/__SN__0500/1, FailureReason=11036 The Message-Authenticator RADIUS attribute is invalid, NetworkDeviceName=KL-__S3__-AP, DetailedInfo=RADIUS timeout \u2014 NAS device KL-__S3__-__CC__-AP-1 unreachable (upstream switch failure)"
+            },
+            {
+              "id": "sw-fail-roam-scanner1-to-ap3",
+              "sourcetype": "meraki:accesspoints",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"wpa_auth\",\"deviceSerial\":\"Q2KD-KL__S3__-C003\",\"deviceName\":\"KL-__S3__-__CC__-AP-3\",\"clientDescription\":\"Scanner-01\",\"clientMac\":\"b8:27:eb:d2:__MAC__:01\",\"description\":\"WPA authentication \u2014 roamed from KL-__S3__-__CC__-AP-1\",\"ssid\":\"KL-SECURE\",\"band\":\"2.4 GHz\",\"channel\":6,\"rssi\":-76}"
+            }
+          ]
+        }
+      ]
+    },
+    "wan_degraded": {
+      "_description": "WAN performance degradation without full failure. MPLS tunnel stays up but with high latency, jitter, and packet loss. No LTE failover. TE shows elevated response times but not critical. No cascade into Meraki or ISE \u2014 pure WAN/app-performance issue.",
+      "mutex_group": "wan",
+      "phases": [
+        {
+          "phase": 1,
+          "name": "WAN Metrics Degrade",
+          "delay_seconds": 0,
+          "description": "SD-WAN tunnel health shows elevated metrics. MPLS tunnel stays up (no failover). Site health shifts from good to degraded.",
+          "events": [
+            {
+              "id": "wan-deg-tunnel-degraded",
+              "sourcetype": "cisco:sdwan:tunnelhealth",
+              "source": "cisco:sdwan:tunnelhealth",
+              "host_override": "kl-__S3__-__cc__-rtr-1",
+              "template": "{\"vdevice-name\":\"10.10.__IPO__.1\",\"vdevice-host-name\":\"kl-__S3__-__cc__-rtr-1\",\"name\":\"kl-__S3__-__cc__-rtr-1\",\"local_system_ip\":\"10.10.__IPO__.1\",\"remote_system_ip\":\"10.100.1.1\",\"local_color\":\"mpls\",\"remote_color\":\"mpls\",\"state\":\"up\",\"device-type\":\"vedge\",\"tx_octets\":284710293,\"rx_octets\":192847102,\"jitter\":42,\"latency\":118,\"loss\":3,\"vqoe_score\":4}"
+            },
+            {
+              "id": "wan-deg-site-degraded",
+              "sourcetype": "cisco:sdwan:sitehealth",
+              "source": "cisco:sdwan:sitehealth",
+              "host_override": "kl-__S3__-__cc__-rtr-1",
+              "template": "{\"vdevice-name\":\"10.10.__IPO__.1\",\"vdevice-host-name\":\"kl-__S3__-__cc__-rtr-1\",\"site-id\":\"10.10.__IPO__.1\",\"site-health\":\"degraded\",\"control-connections\":3,\"bfd-sessions-up\":2,\"bfd-sessions-down\":0,\"omp-peers-up\":2,\"omp-peers-down\":0,\"device-model\":\"C1111-8P\",\"device-status\":\"normal\",\"reachability\":\"reachable\",\"certificate-status\":\"installed\"}"
+            },
+            {
+              "id": "wan-deg-link-degraded",
+              "sourcetype": "cisco:sdwan:linkhealth",
+              "source": "cisco:sdwan:linkhealth",
+              "host_override": "kl-__S3__-__cc__-rtr-1",
+              "template": "{\"vdevice-name\":\"10.10.__IPO__.1\",\"ifname\":\"GigabitEthernet0/0/0\",\"ip-address\":\"10.10.__IPO__.1\",\"hwaddr\":\"00:1a:2b:c3:__MAC__:01\",\"af-type\":\"ipv4\",\"oper-status\":\"if-oper-state-ready\",\"tx-octets\":284710293,\"rx-octets\":192847102,\"tx-packets\":142350,\"rx-packets\":96420,\"color\":\"mpls\",\"encap\":\"ipsec\",\"vdevice-host-name\":\"kl-__S3__-__cc__-rtr-1\"}"
+            }
+          ]
+        },
+        {
+          "phase": 2,
+          "name": "ThousandEyes Detects Elevated Latency",
+          "delay_seconds": 30,
+          "description": "TE HTTP test shows elevated response time (348ms vs normal 42ms). Alert fires at MINOR severity. Path trace identifies ISP PE router with high latency.",
+          "events": [
+            {
+              "id": "wan-deg-te-alert-minor",
+              "sourcetype": "cisco:thousandeyes:alerts",
+              "source": "thousandeyes://http_tests",
+              "template": "{\"alertState\":false,\"severity\":\"MINOR\",\"testId\":200__S3__,\"testName\":\"KL-__S3__ POS Gateway - HTTP\",\"alert_type\":\"HTTP_SERVER\",\"site\":\"__CITY__\",\"metricsAtStart\":{\"responseTime\":348,\"packetLoss\":1.5,\"jitter\":38},\"alert\":{\"id\":\"TE-ALERT-STORE__S3__-DEG\",\"test\":{\"name\":\"KL-__S3__ POS Gateway - HTTP\"},\"rule\":{\"expression\":\"responseTime >= 200 ms\",\"name\":\"POS Gateway Latency\"},\"severity\":\"MINOR\",\"targets\":[{\"agentName\":\"kl-te-__cc__-__S3__.kinlei.corp\",\"location\":\"__CITY__\"}],\"cleared\":false}}"
+            },
+            {
+              "id": "wan-deg-te-http-degraded",
+              "sourcetype": "cisco:thousandeyes:http",
+              "source": "thousandeyes://http_tests",
+              "template": "{\"testId\":200__S3__,\"testName\":\"KL-__S3__ POS Gateway - HTTP\",\"type\":\"HTTP_SERVER\",\"severity\":\"MINOR\",\"active\":1,\"site\":\"__CITY__\",\"metricsAtStart\":{\"responseTime\":348,\"packetLoss\":1.5,\"jitter\":38,\"errorType\":\"None\"},\"agents\":[{\"agentName\":\"kl-te-__cc__-__S3__.kinlei.corp\",\"location\":\"__CITY__\"}],\"summary\":\"HTTP response time 348ms exceeds 200ms threshold \u2014 MPLS degraded, no LTE failover\"}"
+            },
+            {
+              "id": "wan-deg-te-pathtrace",
+              "sourcetype": "cisco:thousandeyes:pathtrace",
+              "source": "thousandeyes://path_trace",
+              "template": "{\"type\":\"PATH_TRACE\",\"target\":\"10.200.1.10\",\"severity\":\"MINOR\",\"active\":1,\"site\":\"__CITY__\",\"problemHop\":\"isp-pe-pdx-01.carrier.net\",\"problemNode\":\"isp-pe-pdx-01\",\"hopLatencyMs\":95,\"ispHopLatencyMs\":92,\"ispStatus\":\"degraded\",\"enterpriseEdgeStatus\":\"healthy\",\"conclusion\":\"ISP PE router showing elevated latency \u2014 possible congestion on carrier MPLS PE\",\"agents\":[{\"agentName\":\"kl-te-__cc__-__S3__.kinlei.corp\",\"location\":\"__CITY__\"}]}"
+            }
+          ]
+        },
+        {
+          "phase": 3,
+          "name": "Sustained Degradation \u2014 No Cascade",
+          "delay_seconds": 60,
+          "description": "WAN stays degraded but not down. LTE is standby but not needed. MX reports slow DHCP. No AP deauths, no ISE failures \u2014 apps are slow but store stays operational.",
+          "events": [
+            {
+              "id": "wan-deg-lte-standby",
+              "sourcetype": "cisco:sdwan:tunnelhealth",
+              "source": "cisco:sdwan:tunnelhealth",
+              "host_override": "kl-__S3__-__cc__-rtr-1",
+              "template": "{\"vdevice-name\":\"10.10.__IPO__.1\",\"vdevice-host-name\":\"kl-__S3__-__cc__-rtr-1\",\"name\":\"kl-__S3__-__cc__-rtr-1\",\"local_system_ip\":\"10.10.__IPO__.1\",\"remote_system_ip\":\"10.100.1.1\",\"local_color\":\"lte\",\"remote_color\":\"lte\",\"state\":\"up\",\"device-type\":\"vedge\",\"tx_octets\":1024,\"rx_octets\":512,\"jitter\":8,\"latency\":45,\"loss\":0,\"vqoe_score\":8}"
+            },
+            {
+              "id": "wan-deg-mx-dhcp-slow",
+              "sourcetype": "meraki:securityappliances",
+              "source": "meraki",
+              "template": "{\"occurredAt\":\"TIMESTAMP_ISO\",\"networkId\":\"__NWID__\",\"type\":\"dhcp_problem\",\"deviceSerial\":\"Q2KD-KL__S3__-X001\",\"deviceName\":\"KL-__S3__-__CC__-MX-1\",\"description\":\"DHCP problem detected\",\"eventData\":{\"extra\":\"DHCP relay response slow \u2014 2.8 second round-trip via degraded WAN\",\"vap\":\"0\",\"vlan\":\"47\"}}"
+            },
+            {
+              "id": "wan-deg-tunnel-still-degraded",
+              "sourcetype": "cisco:sdwan:tunnelhealth",
+              "source": "cisco:sdwan:tunnelhealth",
+              "host_override": "kl-__S3__-__cc__-rtr-1",
+              "template": "{\"vdevice-name\":\"10.10.__IPO__.1\",\"vdevice-host-name\":\"kl-__S3__-__cc__-rtr-1\",\"name\":\"kl-__S3__-__cc__-rtr-1\",\"local_system_ip\":\"10.10.__IPO__.1\",\"remote_system_ip\":\"10.100.1.1\",\"local_color\":\"mpls\",\"remote_color\":\"mpls\",\"state\":\"up\",\"device-type\":\"vedge\",\"tx_octets\":285920183,\"rx_octets\":193218402,\"jitter\":45,\"latency\":125,\"loss\":3,\"vqoe_score\":3}"
+            },
+            {
+              "id": "wan-deg-te-http-still-degraded",
+              "sourcetype": "cisco:thousandeyes:http",
+              "source": "thousandeyes://http_tests",
+              "template": "{\"testId\":200__S3__,\"testName\":\"KL-__S3__ POS Gateway - HTTP\",\"type\":\"HTTP_SERVER\",\"severity\":\"MINOR\",\"active\":1,\"site\":\"__CITY__\",\"metricsAtStart\":{\"responseTime\":362,\"packetLoss\":1.8,\"jitter\":41,\"errorType\":\"None\"},\"agents\":[{\"agentName\":\"kl-te-__cc__-__S3__.kinlei.corp\",\"location\":\"__CITY__\"}],\"summary\":\"HTTP response time still elevated \u2014 362ms (threshold 200ms)\"}"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

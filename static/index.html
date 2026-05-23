@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kinetic Leisure — Scenario Controller</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0c0e13;
+    --surface: #14171e;
+    --surface-hover: #1a1e27;
+    --border: #252a35;
+    --text: #e2e4e9;
+    --text-dim: #6b7280;
+    --accent: #22d3ee;
+    --accent-dim: rgba(34, 211, 238, 0.12);
+    --green: #34d399;
+    --green-dim: rgba(52, 211, 153, 0.12);
+    --red: #f87171;
+    --red-dim: rgba(248, 113, 113, 0.12);
+    --amber: #fbbf24;
+    --amber-dim: rgba(251, 191, 36, 0.12);
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --radius: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  .header {
+    padding: 20px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), #06b6d4);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px; color: var(--bg);
+    font-family: var(--mono);
+  }
+  .header-title { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .header-subtitle { font-size: 12px; color: var(--text-dim); font-family: var(--mono); letter-spacing: 0.04em; }
+
+  /* ── Main Layout ── */
+  .main { max-width: 880px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  /* ── Section ── */
+  .section { margin-bottom: 20px; }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    cursor: pointer; user-select: none; transition: background 0.15s;
+  }
+  .section-header:hover { background: var(--surface-hover); }
+  .section-header.collapsed { border-radius: var(--radius); }
+  .section-label {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .section-chevron {
+    font-size: 14px; color: var(--text-dim);
+    transition: transform 0.2s;
+  }
+  .section-header.collapsed .section-chevron { transform: rotate(-90deg); }
+  .section-body {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 18px; overflow: hidden;
+    transition: max-height 0.3s, padding 0.3s;
+  }
+  .section-body.hidden { max-height: 0; padding: 0 18px; border: none; }
+
+  /* ── Config Form ── */
+  .form-row { margin-bottom: 14px; }
+  .form-row:last-child { margin-bottom: 0; }
+  .form-label {
+    display: block; font-size: 11px; font-weight: 600;
+    color: var(--text-dim); margin-bottom: 5px;
+    font-family: var(--mono); letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .form-input {
+    width: 100%; padding: 9px 12px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text);
+    font-family: var(--mono); font-size: 13px; outline: none;
+    transition: border 0.15s;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-row-inline { display: flex; gap: 12px; align-items: flex-end; }
+  .form-row-inline .form-row { flex: 1; margin-bottom: 0; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 12px; font-weight: 600;
+    font-family: var(--sans); cursor: pointer; transition: all 0.15s;
+    background: var(--surface-hover); color: var(--text);
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .btn-primary:hover { opacity: 0.9; color: var(--bg); }
+  .btn-danger { border-color: var(--red); color: var(--red); }
+  .btn-danger:hover { background: var(--red-dim); }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+
+  /* ── Status Bar ── */
+  .status-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px;
+  }
+  .stat-label {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 6px;
+  }
+  .stat-value { font-size: 22px; font-weight: 700; font-family: var(--mono); }
+  .stat-sub { font-size: 11px; color: var(--text-dim); font-family: var(--mono); margin-top: 2px; }
+  .mode-idle { color: var(--text-dim); }
+  .mode-healthy { color: var(--green); }
+  .mode-fault { color: var(--red); }
+
+  /* ── Master Toggle ── */
+  .master-control {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px;
+  }
+  .master-left { display: flex; align-items: center; gap: 14px; }
+  .master-indicator {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--text-dim); transition: background 0.3s, box-shadow 0.3s;
+  }
+  .master-indicator.active {
+    background: var(--green);
+    box-shadow: 0 0 12px rgba(52, 211, 153, 0.5);
+  }
+  .master-label { font-weight: 600; font-size: 14px; }
+  .master-desc { font-size: 12px; color: var(--text-dim); }
+
+  /* ── Toggle Switch ── */
+  .toggle { position: relative; width: 44px; height: 24px; cursor: pointer; }
+  .toggle input { display: none; }
+  .toggle-track {
+    position: absolute; inset: 0;
+    background: var(--border); border-radius: 12px; transition: background 0.2s;
+  }
+  .toggle input:checked + .toggle-track { background: var(--accent); }
+  .toggle-thumb {
+    position: absolute; top: 2px; left: 2px;
+    width: 20px; height: 20px; background: white;
+    border-radius: 50%; transition: transform 0.2s; pointer-events: none;
+  }
+  .toggle input:checked ~ .toggle-thumb { transform: translateX(20px); }
+  .toggle-fault input:checked + .toggle-track { background: var(--red); }
+  .toggle-sm { width: 36px; height: 20px; }
+  .toggle-sm .toggle-thumb { width: 16px; height: 16px; }
+  .toggle-sm input:checked ~ .toggle-thumb { transform: translateX(16px); }
+
+  /* ── Store Cards ── */
+  .store-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 14px; overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .store-card.has-fault { border-color: var(--red); }
+  .store-card.disabled { opacity: 0.5; }
+  .store-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; cursor: pointer; user-select: none;
+    transition: background 0.15s;
+  }
+  .store-header:hover { background: var(--surface-hover); }
+  .store-info { display: flex; align-items: center; gap: 12px; flex: 1; }
+  .store-num {
+    font-family: var(--mono); font-weight: 700; font-size: 14px;
+    color: var(--accent); min-width: 65px;
+  }
+  .store-city { font-size: 13px; font-weight: 500; color: var(--text); }
+  .store-region {
+    font-size: 11px; color: var(--text-dim); font-family: var(--mono);
+  }
+  .store-badges { display: flex; align-items: center; gap: 8px; }
+  .store-fault-count {
+    font-size: 9px; font-weight: 700; font-family: var(--mono);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 4px;
+  }
+  .store-fault-count.active { background: var(--red-dim); color: var(--red); }
+  .store-fault-count.ok { background: var(--green-dim); color: var(--green); }
+  .store-chevron {
+    font-size: 12px; color: var(--text-dim); transition: transform 0.2s;
+    margin-left: 10px;
+  }
+  .store-header.collapsed .store-chevron { transform: rotate(-90deg); }
+  .store-body {
+    border-top: 1px solid var(--border); padding: 14px 18px;
+    overflow: hidden; transition: max-height 0.3s, padding 0.3s;
+  }
+  .store-body.hidden { max-height: 0; padding: 0 18px; border-top: none; }
+
+  /* ── Fault Cards (inside store) ── */
+  .fault-card {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; margin-bottom: 10px; overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .fault-card:last-child { margin-bottom: 0; }
+  .fault-card.active { border-color: var(--red); }
+  .fault-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+  }
+  .fault-info { flex: 1; }
+  .fault-name {
+    font-weight: 700; font-size: 13px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .fault-badge {
+    font-size: 9px; font-weight: 700; font-family: var(--mono);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 4px;
+  }
+  .fault-badge.active { background: var(--red-dim); color: var(--red); }
+  .fault-badge.ready { background: var(--green-dim); color: var(--green); }
+  .fault-badge.blocked { background: var(--amber-dim); color: var(--amber); }
+  .fault-desc {
+    font-size: 11px; color: var(--text-dim);
+    margin-top: 3px; line-height: 1.5;
+  }
+
+  /* ── Phases ── */
+  .phases {
+    border-top: 1px solid var(--border);
+    padding: 10px 16px; display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .phase-chip {
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 8px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 5px;
+    font-size: 10px; font-family: var(--mono);
+    color: var(--text-dim); transition: all 0.3s;
+  }
+  .phase-chip.fired {
+    border-color: var(--red); color: var(--red); background: var(--red-dim);
+  }
+  .phase-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--text-dim); transition: background 0.3s;
+  }
+  .phase-chip.fired .phase-dot {
+    background: var(--red);
+    box-shadow: 0 0 6px rgba(248, 113, 113, 0.5);
+  }
+
+  /* ── Feedback ── */
+  .toast {
+    position: fixed; bottom: 20px; right: 20px;
+    padding: 10px 16px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: 12px; font-family: var(--mono);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    opacity: 0; transform: translateY(10px);
+    transition: all 0.3s; z-index: 100;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.error { border-color: var(--red); color: var(--red); }
+
+  @media (max-width: 640px) {
+    .status-bar { grid-template-columns: repeat(2, 1fr); }
+    .form-row-inline { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">KL</div>
+    <div>
+      <div class="header-title">Kinetic Leisure</div>
+      <div class="header-subtitle">SCENARIO CONTROLLER · FLEET</div>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--text-dim);font-family:var(--mono)" id="clock"></div>
+</div>
+
+<div class="main">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="stat-card">
+      <div class="stat-label">Mode</div>
+      <div class="stat-value mode-idle" id="stat-mode">IDLE</div>
+      <div class="stat-sub" id="stat-stores-sub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Events Sent</div>
+      <div class="stat-value" id="stat-events" style="color:var(--accent)">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Errors</div>
+      <div class="stat-value" id="stat-errors" style="color:var(--text-dim)">0</div>
+      <div class="stat-sub" id="stat-last-error"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Last Event</div>
+      <div class="stat-value" style="font-size:13px;color:var(--text-dim)" id="stat-last-time">—</div>
+    </div>
+  </div>
+
+  <!-- Master Control -->
+  <div class="master-control">
+    <div class="master-left">
+      <div class="master-indicator" id="master-indicator"></div>
+      <div>
+        <div class="master-label">Event Engine</div>
+        <div class="master-desc" id="master-desc">Stopped — configure HEC and press Start</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" id="btn-start" onclick="startSending()">▶ Start</button>
+      <button class="btn btn-danger" id="btn-stop" onclick="stopSending()" style="display:none">■ Stop</button>
+    </div>
+  </div>
+
+  <!-- HEC Config -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-label">HEC Configuration</span>
+      <span class="section-chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="form-row">
+        <label class="form-label">HEC Endpoint URL</label>
+        <input class="form-input" id="cfg-url" type="text"
+               placeholder="https://your-splunk:8088/services/collector">
+      </div>
+      <div class="form-row-inline">
+        <div class="form-row">
+          <label class="form-label">HEC Token</label>
+          <input class="form-input" id="cfg-token" type="password"
+                 placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Index</label>
+          <input class="form-input" id="cfg-index" type="text" value="main">
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px;align-items:center">
+        <button class="btn btn-primary" onclick="saveConfig()">Save</button>
+        <button class="btn" onclick="testHec()">Test Connection</button>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;font-weight:600;color:var(--text-dim);font-family:var(--mono);letter-spacing:0.04em;text-transform:uppercase">App Logs → Splunk</span>
+          <label class="toggle toggle-sm">
+            <input type="checkbox" id="cfg-hec-logging" onchange="toggleHecLogging()">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fleet -->
+  <div id="fleet-container">
+    <div style="color:var(--text-dim);font-size:13px;padding:20px">Loading fleet...</div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Clock ──
+  function updateClock() {
+    document.getElementById('clock').textContent =
+      new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // ── Toast ──
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast show ${type}`;
+    setTimeout(() => t.className = 'toast', 3000);
+  }
+
+  // ── Section Toggle ──
+  function toggleSection(header) {
+    const body = header.nextElementSibling;
+    header.classList.toggle('collapsed');
+    body.classList.toggle('hidden');
+  }
+
+  // ── API helpers ──
+  async function api(path, method = 'GET', body = null) {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const resp = await fetch(`/api/${path}`, opts);
+    return resp.json();
+  }
+
+  // ── Config ──
+  async function loadConfig() {
+    const cfg = await api('config');
+    if (cfg.hec_url) document.getElementById('cfg-url').value = cfg.hec_url;
+    if (cfg.hec_index) document.getElementById('cfg-index').value = cfg.hec_index;
+    document.getElementById('cfg-hec-logging').checked = cfg.hec_logging_enabled || false;
+  }
+
+  async function saveConfig() {
+    const url = document.getElementById('cfg-url').value.trim();
+    const token = document.getElementById('cfg-token').value.trim();
+    const idx = document.getElementById('cfg-index').value.trim() || 'main';
+    const hecLogging = document.getElementById('cfg-hec-logging').checked;
+    if (!url || !token) { showToast('URL and Token are required', 'error'); return; }
+    const result = await api('config', 'POST', {
+      hec_url: url, hec_token: token, hec_index: idx,
+      hec_verify_ssl: false, hec_logging_enabled: hecLogging,
+    });
+    showToast(result.message || 'Config saved');
+  }
+
+  async function toggleHecLogging() {
+    const result = await api('hec-logging', 'POST');
+    if (result.status === 'ok') {
+      document.getElementById('cfg-hec-logging').checked = result.hec_logging_enabled;
+      showToast(result.hec_logging_enabled ? 'App logs → Splunk enabled' : 'App logs → Splunk disabled');
+    }
+  }
+
+  async function testHec() {
+    showToast('Testing HEC connection...', 'success');
+    const result = await api('test-hec', 'POST');
+    showToast(result.message, result.status === 'ok' ? 'success' : 'error');
+  }
+
+  // ── Start / Stop ──
+  async function startSending() {
+    const result = await api('start', 'POST');
+    if (result.status === 'ok') {
+      showToast('Event engine started — sending fleet events');
+      document.getElementById('btn-start').style.display = 'none';
+      document.getElementById('btn-stop').style.display = '';
+    } else {
+      showToast(result.detail || 'Failed to start', 'error');
+    }
+  }
+
+  async function stopSending() {
+    const result = await api('stop', 'POST');
+    if (result.status === 'ok') {
+      showToast('Event engine stopped — all faults reset');
+      document.getElementById('btn-start').style.display = '';
+      document.getElementById('btn-stop').style.display = 'none';
+    }
+    refreshFleet();
+  }
+
+  // ── Display Name Formatting ──
+  function storeDisplay(num) {
+    return String(num).padStart(3, '0');
+  }
+
+  function faultDisplayName(name) {
+    const acronyms = ['wan', 'ap', 'ise', 'te'];
+    return name.replace(/_/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase())
+      .replace(/\b\w+\b/g, word => acronyms.includes(word.toLowerCase()) ? word.toUpperCase() : word)
+      .replace(/\bWifi\b/gi, 'WiFi');
+  }
+
+  // ── Store Enable/Disable ──
+  async function toggleStore(storeNum, enable) {
+    const action = enable ? 'enable' : 'disable';
+    const result = await api(`stores/${storeNum}/${action}`, 'POST');
+    if (result.status === 'ok') {
+      showToast(enable
+        ? `Store ${storeDisplay(storeNum)} enabled`
+        : `Store ${storeDisplay(storeNum)} disabled — faults reset`);
+      refreshFleet();
+    }
+  }
+
+  // ── Fault Toggles ──
+  async function toggleFault(storeNum, name, activate) {
+    const action = activate ? 'activate' : 'deactivate';
+    const result = await api(`faults/${storeNum}/${name}/${action}`, 'POST');
+    if (result.status === 'ok') {
+      showToast(activate
+        ? `🔴 FAULT: Store ${storeDisplay(storeNum)} / ${faultDisplayName(name)}`
+        : `✅ Cleared: Store ${storeDisplay(storeNum)} / ${faultDisplayName(name)}`,
+        activate ? 'error' : 'success');
+      refreshFleet();
+      if (activate) startPhasePoll(storeNum);
+    } else {
+      showToast(result.detail || 'Failed', 'error');
+      refreshFleet();
+    }
+  }
+
+  let phasePollTimer = null;
+  function startPhasePoll(storeNum) {
+    if (phasePollTimer) clearInterval(phasePollTimer);
+    let elapsed = 0;
+    phasePollTimer = setInterval(async () => {
+      elapsed += 1;
+      await refreshFaults(storeNum);
+      if (elapsed > 120) {
+        clearInterval(phasePollTimer);
+        phasePollTimer = null;
+      }
+    }, 1000);
+  }
+
+  // ── Toggle Store Section ──
+  function toggleStoreSection(header) {
+    const body = header.nextElementSibling;
+    header.classList.toggle('collapsed');
+    body.classList.toggle('hidden');
+  }
+
+  // ── Fleet Rendering ──
+  let storesCache = [];
+  let faultsCache = {};
+
+  async function refreshFleet() {
+    const [stores, faults] = await Promise.all([api('stores'), api('faults')]);
+    storesCache = stores;
+    faultsCache = faults;
+    renderFleet();
+  }
+
+  async function refreshFaults(storeNum) {
+    const faults = await api(`faults/${storeNum}`);
+    faultsCache[storeNum] = faults;
+    updateStoreCard(storeNum);
+  }
+
+  function renderFleet() {
+    const container = document.getElementById('fleet-container');
+
+    container.innerHTML = storesCache.map(store => {
+      const faults = faultsCache[store.number] || [];
+      const hasFault = store.active_faults > 0;
+      const disabled = !store.enabled;
+
+      return `
+        <div class="store-card ${hasFault ? 'has-fault' : ''} ${disabled ? 'disabled' : ''}"
+             id="store-${store.number}">
+          <div class="store-header ${hasFault ? '' : 'collapsed'}"
+               onclick="toggleStoreSection(this)">
+            <div class="store-info">
+              <span class="store-num">#${storeDisplay(store.number)}</span>
+              <span class="store-city">${store.city}</span>
+              <span class="store-region">${store.city_code} · ${store.state_province}, ${store.country}</span>
+            </div>
+            <div class="store-badges">
+              <span class="store-fault-count ${hasFault ? 'active' : 'ok'}">
+                ${hasFault ? store.active_faults + ' FAULT' + (store.active_faults > 1 ? 'S' : '') : 'HEALTHY'}
+              </span>
+              <label class="toggle toggle-sm" onclick="event.stopPropagation()">
+                <input type="checkbox" ${store.enabled ? 'checked' : ''}
+                       onchange="toggleStore(${store.number}, this.checked)">
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </label>
+              <span class="store-chevron">▼</span>
+            </div>
+          </div>
+          <div class="store-body ${hasFault ? '' : 'hidden'}" id="store-body-${store.number}">
+            ${renderFaultCards(store.number, faults)}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderFaultCards(storeNum, faults) {
+    if (!faults.length) return '<div style="color:var(--text-dim);font-size:12px">No fault scenarios</div>';
+
+    return faults.map(f => `
+      <div class="fault-card ${f.active ? 'active' : ''}" id="fault-${storeNum}-${f.name}">
+        <div class="fault-header">
+          <div class="fault-info">
+            <div class="fault-name">
+              ${faultDisplayName(f.name)}
+              <span class="fault-badge ${f.active ? 'active' : 'ready'}">
+                ${f.active ? 'ACTIVE' : 'READY'}
+              </span>
+            </div>
+            <div class="fault-desc">${f.description}</div>
+          </div>
+          <label class="toggle toggle-fault" onclick="event.stopPropagation()">
+            <input type="checkbox" ${f.active ? 'checked' : ''}
+                   onchange="toggleFault(${storeNum}, '${f.name}', this.checked)">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+        <div class="phases">
+          ${f.phases.map(p => `
+            <div class="phase-chip ${p.fired ? 'fired' : ''}">
+              <div class="phase-dot"></div>
+              P${p.phase}: ${p.name} (+${p.delay_seconds}s · ${p.event_count}ev)
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function updateStoreCard(storeNum) {
+    const faults = faultsCache[storeNum] || [];
+    const bodyEl = document.getElementById(`store-body-${storeNum}`);
+    if (bodyEl) {
+      bodyEl.innerHTML = renderFaultCards(storeNum, faults);
+    }
+
+    // Update store-level badge
+    const card = document.getElementById(`store-${storeNum}`);
+    if (card) {
+      const activeFaults = faults.filter(f => f.active).length;
+      card.classList.toggle('has-fault', activeFaults > 0);
+      const badge = card.querySelector('.store-fault-count');
+      if (badge) {
+        badge.className = `store-fault-count ${activeFaults > 0 ? 'active' : 'ok'}`;
+        badge.textContent = activeFaults > 0
+          ? activeFaults + ' FAULT' + (activeFaults > 1 ? 'S' : '')
+          : 'HEALTHY';
+      }
+    }
+  }
+
+  // ── Status Polling ──
+  async function pollStatus() {
+    try {
+      const s = await api('status');
+
+      const modeEl = document.getElementById('stat-mode');
+      modeEl.textContent = s.mode.toUpperCase();
+      modeEl.className = `stat-value mode-${s.mode}`;
+
+      document.getElementById('stat-stores-sub').textContent =
+        `${s.stores_enabled}/${s.stores_total} stores`;
+
+      document.getElementById('stat-events').textContent =
+        s.events_sent.toLocaleString();
+
+      const errEl = document.getElementById('stat-errors');
+      errEl.textContent = s.errors;
+      errEl.style.color = s.errors > 0 ? 'var(--red)' : 'var(--text-dim)';
+      document.getElementById('stat-last-error').textContent =
+        s.last_error ? s.last_error.slice(0, 50) : '';
+
+      document.getElementById('stat-last-time').textContent =
+        s.last_event_time ? s.last_event_time.replace('T', ' ').slice(11, 19) : '—';
+
+      const ind = document.getElementById('master-indicator');
+      ind.classList.toggle('active', s.sending);
+
+      const desc = document.getElementById('master-desc');
+      if (!s.hec_configured) desc.textContent = 'Configure HEC endpoint first';
+      else if (!s.sending) desc.textContent = 'Ready — press Start to begin';
+      else if (s.mode === 'healthy') desc.textContent = `Sending healthy baseline for ${s.stores_enabled} stores`;
+      else if (s.mode === 'fault') desc.textContent = '⚠ Fault injection active — check fleet panel';
+
+      document.getElementById('btn-start').style.display = s.sending ? 'none' : '';
+      document.getElementById('btn-stop').style.display = s.sending ? '' : 'none';
+
+      const hecLogToggle = document.getElementById('cfg-hec-logging');
+      if (hecLogToggle && hecLogToggle.checked !== s.hec_logging_enabled) {
+        hecLogToggle.checked = s.hec_logging_enabled;
+      }
+
+    } catch (e) {}
+  }
+
+  // ── Init ──
+  loadConfig();
+  refreshFleet();
+  pollStatus();
+  setInterval(pollStatus, 3000);
+  setInterval(refreshFleet, 10000);
+</script>
+
+</body>
+</html>

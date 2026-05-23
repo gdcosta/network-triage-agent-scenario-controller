@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kinetic-leisure
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kl-scenario-hec
+  namespace: kinetic-leisure
+type: Opaque
+stringData:
+  HEC_URL: "https://your-splunk:8088/services/collector"
+  HEC_TOKEN: "your-hec-token-here"
+  HEC_INDEX: "main"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kl-scenario-controller
+  namespace: kinetic-leisure
+  labels:
+    app: kl-scenario-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kl-scenario-controller
+  template:
+    metadata:
+      labels:
+        app: kl-scenario-controller
+    spec:
+      containers:
+        - name: scenario-controller
+          image: kl-scenario-controller:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: kl-scenario-hec
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kl-scenario-controller
+  namespace: kinetic-leisure
+spec:
+  selector:
+    app: kl-scenario-controller
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kl-scenario-controller
+  namespace: kinetic-leisure
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: scenario.kinlei.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kl-scenario-controller
+                port:
+                  number: 8080

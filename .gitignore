@@ -1,0 +1,16 @@
+# Runtime config written by the app/UI — contains the real HEC URL + token. NEVER commit.
+config.json
+
+# Secrets / env
+.env
+*.env
+
+# Python / build cruft
+.venv/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Distribution archives
+*.zip

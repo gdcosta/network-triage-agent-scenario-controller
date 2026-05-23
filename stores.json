@@ -1,0 +1,71 @@
+{
+  "_comment": "Kinetic Leisure — Store Fleet Identity. Each store's values are used to hydrate event-templates.json at startup.",
+  "stores": [
+    {
+      "number": 47,
+      "city": "Portland",
+      "city_code": "PDX",
+      "state_province": "OR",
+      "country": "US",
+      "lat": 45.5152,
+      "lon": -122.6784,
+      "ip_octet": 47,
+      "mac_octet": "47"
+    },
+    {
+      "number": 112,
+      "city": "Vancouver",
+      "city_code": "VAN",
+      "state_province": "BC",
+      "country": "CA",
+      "lat": 49.2827,
+      "lon": -123.1207,
+      "ip_octet": 112,
+      "mac_octet": "70"
+    },
+    {
+      "number": 237,
+      "city": "Portland",
+      "city_code": "PDX",
+      "state_province": "OR",
+      "country": "US",
+      "lat": 45.5231,
+      "lon": -122.6765,
+      "ip_octet": 237,
+      "mac_octet": "ed"
+    },
+    {
+      "number": 305,
+      "city": "Seattle",
+      "city_code": "SEA",
+      "state_province": "WA",
+      "country": "US",
+      "lat": 47.6062,
+      "lon": -122.3321,
+      "ip_octet": 50,
+      "mac_octet": "31"
+    },
+    {
+      "number": 418,
+      "city": "LosAngeles",
+      "city_code": "LAX",
+      "state_province": "CA",
+      "country": "US",
+      "lat": 34.0522,
+      "lon": -118.2437,
+      "ip_octet": 62,
+      "mac_octet": "a2"
+    },
+    {
+      "number": 521,
+      "city": "SanDiego",
+      "city_code": "SAN",
+      "state_province": "CA",
+      "country": "US",
+      "lat": 32.7157,
+      "lon": -117.1611,
+      "ip_octet": 21,
+      "mac_octet": "09"
+    }
+  ]
+}
