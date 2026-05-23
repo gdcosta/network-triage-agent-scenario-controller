@@ -65,5 +65,11 @@ have a WAN failure while Store 112 runs healthy.
 docker build -t kl-scenario-controller:latest .
 docker tag kl-scenario-controller:latest localhost:5000/kl-scenario-controller:latest
 docker push localhost:5000/kl-scenario-controller:latest
-kubectl rollout restart deployment kl-scenario-controller -n net-triage-agent
+
+# First deploy — creates the kinetic-leisure namespace, Secret, Deployment, Service, Ingress.
+# Edit the HEC_URL / HEC_TOKEN placeholders in k8s-manifest.yaml first.
+kubectl apply -f k8s-manifest.yaml
+
+# Subsequent image updates:
+kubectl rollout restart deployment kl-scenario-controller -n kinetic-leisure
 ```
