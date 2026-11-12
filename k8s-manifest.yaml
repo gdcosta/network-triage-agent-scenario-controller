@@ -1,26 +1,34 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: kinetic-leisure
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: kl-scenario-hec
-  namespace: kinetic-leisure
-type: Opaque
-stringData:
-  HEC_URL: "https://your-splunk:8088/services/collector"
-  HEC_TOKEN: "your-hec-token-here"
-  HEC_INDEX: "main"
+# Kinetic Leisure scenario controller: Kubernetes manifest.
+#
+# Mirrors the objects running in the demo cluster (Deployment, Service, and a
+# Cilium Gateway API Gateway + HTTPRoute), with cluster-generated fields
+# (status, uid, resourceVersion, clusterIP, LoadBalancer address) removed.
+#
+# There is NO Secret and NO env block: the HEC URL / token / index are entered
+# in the control-panel UI and persisted by the app to /app/config.json inside
+# the container (see README, "HEC configuration"). Never put a real token in
+# this file.
+#
+# Prerequisites:
+#   - Namespace `net-triage-agent` already exists (it is shared with the
+#     triage agent). Create it first if you are deploying standalone:
+#       kubectl create namespace net-triage-agent
+#   - A container registry reachable at localhost:5000 (see README), or edit
+#     `image:` below.
+#   - Gateway API CRDs + a GatewayClass named `cilium`. If you use a different
+#     ingress mechanism, drop the Gateway/HTTPRoute and use the commented
+#     Ingress alternative at the bottom, or `kubectl port-forward`.
+#
+# Apply with:  kubectl apply -f k8s-manifest.yaml
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kl-scenario-controller
-  namespace: kinetic-leisure
+  namespace: net-triage-agent
   labels:
     app: kl-scenario-controller
+    component: data-generation
 spec:
   replicas: 1
   selector:
@@ -30,15 +38,28 @@ spec:
     metadata:
       labels:
         app: kl-scenario-controller
+        component: data-generation
     spec:
       containers:
         - name: scenario-controller
-          image: kl-scenario-controller:latest
+          image: localhost:5000/kl-scenario-controller:latest
+          # :latest + Always means a `rollout restart` picks up a freshly
+          # pushed image.
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
-          envFrom:
-            - secretRef:
-                name: kl-scenario-hec
+          livenessProbe:
+            httpGet:
+              path: /api/status
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/status
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
           resources:
             requests:
               cpu: 100m
@@ -51,31 +72,67 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kl-scenario-controller
-  namespace: kinetic-leisure
+  namespace: net-triage-agent
 spec:
+  type: ClusterIP
   selector:
     app: kl-scenario-controller
   ports:
-    - port: 8080
+    - port: 80
       targetPort: 8080
-  type: ClusterIP
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+# Cilium Gateway API entry point (HTTP :80). In the demo cluster the Gateway is
+# given a LoadBalancer address by the cluster; that address is assigned at
+# runtime, is not part of the spec, and is intentionally not recorded here.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
 metadata:
-  name: kl-scenario-controller
-  namespace: kinetic-leisure
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+  name: scenario-controller-gateway
+  namespace: net-triage-agent
 spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Same
+---
+# Routes every path on the Gateway to the Service. No `hostnames` are set, so
+# the route matches any Host header: reach it by the Gateway's address.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: scenario-controller-httproute
+  namespace: net-triage-agent
+spec:
+  parentRefs:
+    - name: scenario-controller-gateway
+      sectionName: http
   rules:
-    - host: scenario.kinlei.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: kl-scenario-controller
-                port:
-                  number: 8080
+    - backendRefs:
+        - name: kl-scenario-controller
+          port: 80
+# ---------------------------------------------------------------------------
+# Alternative (NOT deployed in the demo cluster): classic nginx Ingress
+# instead of Gateway + HTTPRoute. Uncomment and replace the placeholder host.
+# ---------------------------------------------------------------------------
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: kl-scenario-controller
+#   namespace: net-triage-agent
+# spec:
+#   ingressClassName: nginx
+#   rules:
+#     - host: scenario.example.internal
+#       http:
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: kl-scenario-controller
+#                 port:
+#                   number: 80

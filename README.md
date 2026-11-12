@@ -61,15 +61,40 @@ have a WAN failure while Store 112 runs healthy.
 
 ## K8s Deployment
 
+`k8s-manifest.yaml` deploys the controller into the `net-triage-agent`
+namespace (shared with the triage agent) as a Deployment + ClusterIP Service
+(80 -> 8080), fronted by a Cilium Gateway API `Gateway` + `HTTPRoute`. A
+commented nginx Ingress alternative is included at the bottom of the file.
+
 ```bash
 docker build -t kl-scenario-controller:latest .
 docker tag kl-scenario-controller:latest localhost:5000/kl-scenario-controller:latest
 docker push localhost:5000/kl-scenario-controller:latest
 
-# First deploy — creates the kinetic-leisure namespace, Secret, Deployment, Service, Ingress.
-# Edit the HEC_URL / HEC_TOKEN placeholders in k8s-manifest.yaml first.
+# The namespace is normally created by the triage agent deployment; if you are
+# deploying standalone, create it first:
+kubectl create namespace net-triage-agent
+
+# First deploy (Deployment, Service, Gateway, HTTPRoute):
 kubectl apply -f k8s-manifest.yaml
 
-# Subsequent image updates:
-kubectl rollout restart deployment kl-scenario-controller -n kinetic-leisure
+# Subsequent image updates (imagePullPolicy is Always):
+kubectl rollout restart deployment kl-scenario-controller -n net-triage-agent
 ```
+
+Find the Gateway address with
+`kubectl get gateway scenario-controller-gateway -n net-triage-agent`
+(or use `kubectl port-forward svc/kl-scenario-controller 8080:80 -n net-triage-agent`).
+
+### HEC configuration
+
+The manifest contains no Secret and no env vars. Set the HEC URL, token and
+index in the control-panel UI; the app persists them to `/app/config.json`
+inside the container and reads that file at startup. `HEC_URL`, `HEC_TOKEN`
+and `HEC_INDEX` environment variables, if set, override the file.
+
+`config.json` lives on the container's writable layer (no volume is mounted),
+so it survives only as long as the container does: after a
+`rollout restart` or pod recreation, re-enter the HEC settings in the UI. If
+you need them to persist, inject the `HEC_*` env vars from your own Secret (or
+mount a persistent volume for `/app/config.json`).
